@@ -52,45 +52,5 @@ spring.datasource.password=sua_senha
 ou mvn spring-boot:run (se você tiver o Maven instalado).
 4. Acesse a API em http://localhost:8080.
 
-
-### Diagrama de entidades
-```mermaid
-classDiagram
-class User {
-+ ID: int
-+ Nome de usuário: string
-+ Senha: string
-+ Nome: string
-+ Email: string
-}
-
-class Customer {
-+ ID: int
-+ Nome: string
-+ Informações de contato: string
-+ Dados de pagamento: string
-}
-
-class GroupBill {
-+ ID: int
-+ Nome ou descrição: string
-+ Data de criação: date
-+ Participantes da conta: array
-}
-
-class Transaction {
-+ ID: int
-+ Data e hora da transação: datetime
-+ Tipo de transação: string
-+ Valor da transação: decimal
-}
-
-User "1" -- "0..n" Customer : Tem
-User "1" -- "0..n" GroupBill : Tem
-Customer "1" -- "0..n" Transaction : Envolvido em
-GroupBill "1" -- "0..n" Transaction : Contém
-Customer "0..n" -- "0..n" GroupBill : Participa
-```
-
 # Licença
 Este projeto é licenciado sob a Licença MIT.
