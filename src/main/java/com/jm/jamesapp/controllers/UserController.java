@@ -3,7 +3,7 @@ package com.jm.jamesapp.controllers;
 
 import com.jm.jamesapp.dtos.UserRecordDto;
 import com.jm.jamesapp.models.UserModel;
-import com.jm.jamesapp.services.IUserService;
+import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
