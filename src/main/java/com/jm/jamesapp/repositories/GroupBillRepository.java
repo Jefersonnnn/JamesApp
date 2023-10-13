@@ -1,12 +1,11 @@
 package com.jm.jamesapp.repositories;
 
-import com.jm.jamesapp.models.CustomerModel;
+import com.jm.jamesapp.models.GroupBillModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
 @Repository
-public interface CustomerRepository extends JpaRepository<CustomerModel, UUID> {
-
+public interface GroupBillRepository extends JpaRepository<GroupBillModel, UUID> {
 }

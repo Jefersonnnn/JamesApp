@@ -1,7 +1,7 @@
 package com.jm.jamesapp.controllers;
 
 import com.jm.jamesapp.dtos.CustomerRecordDto;
-import com.jm.jamesapp.dtos.CustomerResponseRecordDto;
+import com.jm.jamesapp.dtos.responses.CustomerResponseRecordDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.IUserService;
@@ -35,7 +35,7 @@ public class CustomerController {
 
     @PostMapping
     public ResponseEntity<Object> saveCustomer(@RequestBody @Valid CustomerRecordDto customerRecordDto) {
-        var ownerUser = userService.findById(UUID.fromString(customerRecordDto.owner()));
+        var ownerUser = userService.findById(UUID.fromString(customerRecordDto.ownerId()));
 
         if(ownerUser.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Owner not found.");
