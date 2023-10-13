@@ -1,4 +1,4 @@
-package com.jm.jamesapp.services;
+package com.jm.jamesapp.services.interfaces;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

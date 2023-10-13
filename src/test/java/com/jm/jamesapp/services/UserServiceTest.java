@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,32 +36,35 @@ public class UserServiceTest {
     }
 
     @Test
+    @SqlGroup({
+            @Sql(value = "classpath:reset-user.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(value = "classpath:init/user-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    })
     public void testFindAllUsers(){
-        UserModel user = new UserModel();
-        user.setName("James");
-        user.setPassword("123james");
-        user.setEmail("james@jamesapp.com.br");
-
-        userService.save(user);
-
         Pageable paginacao = PageRequest.of(0, 10);
         Page<UserModel> userModelList = userService.findAll(paginacao);
 
         assertNotNull(userModelList);
-        assertEquals(userModelList.getTotalElements(), 1);
-    }
-
-    @Test
-    public void testFindUserById() {
-        Optional<UserModel> user = userService.findById(UUID.randomUUID());
-
-        assert user.isEmpty();
-
+        assertEquals(userModelList.getTotalElements(), 5);
     }
 
     @Test
     @SqlGroup({
-            @Sql(value = "classpath:reset.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(value = "classpath:reset-user.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(value = "classpath:init/user-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    })
+    public void testFindUserById() {
+        var uuid = UUID.fromString("1c1bfebd-52e3-4d47-8527-bea182851407");
+        Optional<UserModel> user = userService.findById(uuid);
+
+        assert user.isPresent();
+        assert uuid == user.get().getId();
+    }
+
+    @Test
+    @SqlGroup({
+            @Sql(value = "classpath:reset-customer.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(value = "classpath:reset-user.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
             @Sql(value = "classpath:init/user-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     })
     public void testDeleteUser(){

@@ -2,6 +2,7 @@ package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.repositories.UserRepository;
+import com.jm.jamesapp.services.interfaces.IUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class UserService implements IUserService{
+public class UserService implements IUserService {
 
     final UserRepository userRepository;
 
