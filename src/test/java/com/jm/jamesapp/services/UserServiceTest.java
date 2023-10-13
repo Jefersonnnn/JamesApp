@@ -37,7 +37,7 @@ public class UserServiceTest {
 
     @Test
     @SqlGroup({
-            @Sql(value = "classpath:reset-user.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(value = "classpath:reset.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
             @Sql(value = "classpath:init/user-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     })
     public void testFindAllUsers(){
@@ -50,7 +50,7 @@ public class UserServiceTest {
 
     @Test
     @SqlGroup({
-            @Sql(value = "classpath:reset-user.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(value = "classpath:reset.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
             @Sql(value = "classpath:init/user-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     })
     public void testFindUserById() {
@@ -63,8 +63,7 @@ public class UserServiceTest {
 
     @Test
     @SqlGroup({
-            @Sql(value = "classpath:reset-customer.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-            @Sql(value = "classpath:reset-user.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(value = "classpath:reset.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
             @Sql(value = "classpath:init/user-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     })
     public void testDeleteUser(){
