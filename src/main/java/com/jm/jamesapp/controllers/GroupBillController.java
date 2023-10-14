@@ -9,6 +9,7 @@ import com.jm.jamesapp.services.interfaces.IGroupBillService;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -71,29 +72,28 @@ public class GroupBillController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllGroupBills(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+    public ResponseEntity<Page<GroupBillModel>> getAllGroupBills(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
 
         var groupBillsList = groupBillService.findAll(pageable);
         if(groupBillsList.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("GroupBills not found.");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+//        var responseList = new ArrayList<GroupBillResponseRecordDto>();
+//
+//        for (var groupBill:groupBillsList) {
+//            var cResponse = new GroupBillResponseRecordDto(
+//                    groupBill.getId(),
+//                    groupBill.getOwner().getId(),
+//                    groupBill.getName(),
+//                    groupBill.getTotalPayment(),
+//                    groupBill.getDueDateDay(),
+//                    groupBill.getDueDateHour(),
+//                    groupBill.getDescription()
+//            );
+//            responseList.add(cResponse);
+//        }
 
-        var responseList = new ArrayList<GroupBillResponseRecordDto>();
-
-        for (var groupBill:groupBillsList) {
-            var cResponse = new GroupBillResponseRecordDto(
-                    groupBill.getId(),
-                    groupBill.getOwner().getId(),
-                    groupBill.getName(),
-                    groupBill.getTotalPayment(),
-                    groupBill.getDueDateDay(),
-                    groupBill.getDueDateHour(),
-                    groupBill.getDescription()
-            );
-            responseList.add(cResponse);
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
+        return ResponseEntity.status(HttpStatus.OK).body(groupBillsList);
     }
 
     @GetMapping("/{id}")

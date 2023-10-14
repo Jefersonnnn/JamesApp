@@ -7,6 +7,7 @@ import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -61,27 +62,27 @@ public class CustomerController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllCustomers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+    public ResponseEntity<Page<CustomerModel>> getAllCustomers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
 
         var customersList = customerService.findAll(pageable);
         if(customersList.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customers not found.");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        var responseList = new ArrayList<CustomerResponseRecordDto>();
+//        var responseList = new ArrayList<CustomerResponseRecordDto>();
+//
+//        for (var customer:customersList) {
+//            var cResponse = new CustomerResponseRecordDto(
+//                    customer.getId(),
+//                    customer.getOwner().getId(),
+//                    customer.getName(),
+//                    customer.getCpfCnpj(),
+//                    customer.getBalance()
+//            );
+//            responseList.add(cResponse);
+//        }
 
-        for (var customer:customersList) {
-            var cResponse = new CustomerResponseRecordDto(
-                    customer.getId(),
-                    customer.getOwner().getId(),
-                    customer.getName(),
-                    customer.getCpfCnpj(),
-                    customer.getBalance()
-            );
-            responseList.add(cResponse);
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseList);
+        return ResponseEntity.status(HttpStatus.OK).body(customersList);
     }
 
     @GetMapping("/{id}")
