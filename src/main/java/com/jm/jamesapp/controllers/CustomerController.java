@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -110,6 +111,10 @@ public class CustomerController {
         }
         var customerModel = customerO.get();
         BeanUtils.copyProperties(customerRecordDto, customerModel);
+
+        // Todo: descobrir como adicionar isso como padrão na entidade
+        customerModel.setUpdatedAt(new Date(System.currentTimeMillis()));
+        customerModel.setUpdatedBy("admin");
 
         customerService.save(customerModel);
 

@@ -16,10 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -141,6 +138,10 @@ public class GroupBillController {
         }
         var groupBill = groupBillO.get();
         BeanUtils.copyProperties(groupBillRecordDto, groupBill);
+
+        // Todo: descobrir como adicionar isso como padrão na entidade
+        groupBill.setUpdatedAt(new Date(System.currentTimeMillis()));
+        groupBill.setUpdatedBy("admin");
 
         groupBillService.save(groupBill);
 

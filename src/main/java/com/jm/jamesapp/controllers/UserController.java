@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -59,6 +60,10 @@ public class UserController {
         }
         var userModel = userO.get();
         BeanUtils.copyProperties(userRecordDto, userModel);
+
+        // Todo: descobrir como adicionar isso como padrão na entidade
+        userModel.setUpdatedAt(new Date(System.currentTimeMillis()));
+        userModel.setUpdatedBy("admin");
         return ResponseEntity.status(HttpStatus.OK).body(userService.save(userModel));
     }
 

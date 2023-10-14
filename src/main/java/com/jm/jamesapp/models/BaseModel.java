@@ -13,6 +13,9 @@ public abstract class BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+
+    @Column(name = "created_by")
+    private String createdBy;
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
@@ -23,12 +26,28 @@ public abstract class BaseModel {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    @Column(name = "updated_by")
+    private String updatedBy;
+
+    public BaseModel(){
+        this.createdBy = "admin";
+        this.createdAt = new Date(System.currentTimeMillis());
+    }
+
     public UUID getId() {
         return id;
     }
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 
     public Date getCreatedAt() {
@@ -45,5 +64,13 @@ public abstract class BaseModel {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
     }
 }
