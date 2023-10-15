@@ -29,9 +29,17 @@ public abstract class BaseModel {
     @Column(name = "updated_by")
     private String updatedBy;
 
-    public BaseModel(){
-        this.createdBy = "admin";
-        this.createdAt = new Date(System.currentTimeMillis());
+    public BaseModel() {
+        if (this.createdAt == null) {
+            this.createdBy = "admin";
+            this.createdAt = new Date(System.currentTimeMillis());
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = new Date(System.currentTimeMillis());
+        this.updatedBy = "james.admin";
     }
 
     public UUID getId() {

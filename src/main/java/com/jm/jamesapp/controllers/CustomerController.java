@@ -113,10 +113,6 @@ public class CustomerController {
         var customerModel = customerO.get();
         BeanUtils.copyProperties(customerRecordDto, customerModel);
 
-        // Todo: descobrir como adicionar isso como padrão na entidade
-        customerModel.setUpdatedAt(new Date(System.currentTimeMillis()));
-        customerModel.setUpdatedBy("admin");
-
         customerService.save(customerModel);
 
         var customerResponse = new CustomerResponseRecordDto(

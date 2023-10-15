@@ -138,11 +138,6 @@ public class GroupBillController {
         }
         var groupBill = groupBillO.get();
         BeanUtils.copyProperties(groupBillRecordDto, groupBill);
-
-        // Todo: descobrir como adicionar isso como padrão na entidade
-        groupBill.setUpdatedAt(new Date(System.currentTimeMillis()));
-        groupBill.setUpdatedBy("admin");
-
         groupBillService.save(groupBill);
 
         var groupBillResponse = new GroupBillResponseRecordDto(
