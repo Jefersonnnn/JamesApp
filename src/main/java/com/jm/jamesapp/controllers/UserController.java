@@ -1,7 +1,7 @@
 package com.jm.jamesapp.controllers;
 
 
-import com.jm.jamesapp.dtos.UserRecordDto;
+import com.jm.jamesapp.dtos.requests.UserRequestRecordDto;
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,9 +29,11 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserModel> saveUser(@RequestBody @Valid UserRecordDto userRecordDto) {
+    public ResponseEntity<UserModel> saveUser(@RequestBody @Valid UserRequestRecordDto userRequestRecordDto) {
         var userModel = new UserModel();
-        BeanUtils.copyProperties(userRecordDto, userModel);
+        BeanUtils.copyProperties(userRequestRecordDto, userModel);
+        // UserVO para enviar para o service
+        // Service Retornar o UserModel (BD)
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(userModel));
     }
 
@@ -53,13 +54,13 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateUser(@PathVariable(value="id") UUID id,
-                                                @RequestBody @Valid UserRecordDto userRecordDto) {
+                                                @RequestBody @Valid UserRequestRecordDto userRequestRecordDto) {
         Optional<UserModel> userO = userService.findById(id);
         if(userO.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
         }
         var userModel = userO.get();
-        BeanUtils.copyProperties(userRecordDto, userModel);
+        BeanUtils.copyProperties(userRequestRecordDto, userModel);
         return ResponseEntity.status(HttpStatus.OK).body(userService.save(userModel));
     }
 
