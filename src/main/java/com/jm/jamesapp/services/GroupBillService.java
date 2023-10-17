@@ -3,6 +3,7 @@ package com.jm.jamesapp.services;
 import com.jm.jamesapp.models.GroupBillModel;
 import com.jm.jamesapp.repositories.GroupBillRepository;
 import com.jm.jamesapp.services.interfaces.IGroupBillService;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,13 @@ public class GroupBillService implements IGroupBillService {
     }
 
     @Override
+    @Transactional
     public GroupBillModel save(GroupBillModel objModel) {
+        return groupBillRepository.save(objModel);
+    }
+
+    @Override
+    public GroupBillModel update(GroupBillModel objModel) {
         return groupBillRepository.save(objModel);
     }
 
@@ -35,6 +42,7 @@ public class GroupBillService implements IGroupBillService {
     }
 
     @Override
+    @Transactional
     public void delete(GroupBillModel objModel) {
         groupBillRepository.delete(objModel);
     }

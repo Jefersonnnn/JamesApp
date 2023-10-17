@@ -1,6 +1,6 @@
 package com.jm.jamesapp.controllers;
 
-import com.jm.jamesapp.dtos.GroupBillRecordDto;
+import com.jm.jamesapp.dtos.requests.GroupBillRequestRecordDto;
 import com.jm.jamesapp.dtos.responses.GroupBillResponseRecordDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.GroupBillModel;
@@ -36,21 +36,21 @@ public class GroupBillController {
 
 
     @PostMapping
-    public ResponseEntity<Object> saveGroupBill(@RequestBody @Valid GroupBillRecordDto groupBillRecordDto) {
-        var ownerUser = userService.findById(UUID.fromString(groupBillRecordDto.ownerId()));
+    public ResponseEntity<Object> saveGroupBill(@RequestBody @Valid GroupBillRequestRecordDto groupBillRequestRecordDto) {
+        var ownerUser = userService.findById(UUID.fromString(groupBillRequestRecordDto.ownerId()));
 
         if(ownerUser.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Owner not found.");
         }
 
         var groupBillModel = new GroupBillModel();
-        BeanUtils.copyProperties(groupBillRecordDto, groupBillModel);
+        BeanUtils.copyProperties(groupBillRequestRecordDto, groupBillModel);
 
         groupBillModel.setOwner(ownerUser.get());
 
-        if(groupBillRecordDto.customersIds() != null){
+        if(groupBillRequestRecordDto.customersIds() != null){
             List<CustomerModel> customerModelList = new ArrayList<>();
-            for (var customerId:groupBillRecordDto.customersIds()) {
+            for (var customerId: groupBillRequestRecordDto.customersIds()) {
                 var customer = customerService.findById(customerId);
                 customer.ifPresent(customerModelList::add);
             }
@@ -131,13 +131,13 @@ public class GroupBillController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateGroupBill(@PathVariable(value="id") UUID id,
-                                                @RequestBody @Valid GroupBillRecordDto groupBillRecordDto) {
+                                                @RequestBody @Valid GroupBillRequestRecordDto groupBillRequestRecordDto) {
         Optional<GroupBillModel> groupBillO = groupBillService.findById(id);
         if(groupBillO.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("GroupBill not found.");
         }
         var groupBill = groupBillO.get();
-        BeanUtils.copyProperties(groupBillRecordDto, groupBill);
+        BeanUtils.copyProperties(groupBillRequestRecordDto, groupBill);
         groupBillService.save(groupBill);
 
         var groupBillResponse = new GroupBillResponseRecordDto(
