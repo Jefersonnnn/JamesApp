@@ -1,6 +1,6 @@
 package com.jm.jamesapp.controllers;
 
-import com.jm.jamesapp.dtos.CustomerRecordDto;
+import com.jm.jamesapp.dtos.requests.CustomerRequestRecordDto;
 import com.jm.jamesapp.dtos.responses.CustomerResponseRecordDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
@@ -8,6 +8,7 @@ import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,91 +36,75 @@ public class CustomerController {
 
 
     @PostMapping
-    public ResponseEntity<Object> saveCustomer(@RequestBody @Valid CustomerRecordDto customerRecordDto) {
-        var ownerUser = userService.findById(UUID.fromString(customerRecordDto.ownerId()));
+    public ResponseEntity<Object> saveCustomer(@RequestBody @Valid CustomerRequestRecordDto customerRequestRecordDto) {
+        var ownerUser = userService.findById(UUID.fromString(customerRequestRecordDto.ownerId()));
 
         if(ownerUser.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Owner not found.");
         }
 
         var customerModel = new CustomerModel();
+
+        BeanUtils.copyProperties(customerRequestRecordDto, customerModel);
+
         customerModel.setOwner(ownerUser.get());
-        customerModel.setBalance(BigDecimal.valueOf(0.0));
-
-        BeanUtils.copyProperties(customerRecordDto, customerModel);
-
         customerService.save(customerModel);
 
-        var customerResponse = new CustomerResponseRecordDto(
-                customerModel.getId(),
-                customerModel.getOwner().getId(),
-                customerModel.getName(),
-                customerModel.getCpfCnpj(),
-                customerModel.getBalance());
+        var customerResponse = new CustomerResponseRecordDto(customerModel);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(customerResponse);
     }
 
     @GetMapping
-    public ResponseEntity<Page<CustomerModel>> getAllCustomers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+    public ResponseEntity<Page<CustomerResponseRecordDto>> getAllCustomers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
 
         var customersList = customerService.findAll(pageable);
+
         if(customersList.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-//        var responseList = new ArrayList<CustomerResponseRecordDto>();
-//
-//        for (var customer:customersList) {
-//            var cResponse = new CustomerResponseRecordDto(
-//                    customer.getId(),
-//                    customer.getOwner().getId(),
-//                    customer.getName(),
-//                    customer.getCpfCnpj(),
-//                    customer.getBalance()
-//            );
-//            responseList.add(cResponse);
-//        }
+        var responseList = new ArrayList<CustomerResponseRecordDto>();
 
-        return ResponseEntity.status(HttpStatus.OK).body(customersList);
+        for (var customer:customersList) {
+            var cResponse = new CustomerResponseRecordDto(customer);
+            responseList.add(cResponse);
+        }
+
+        //Todo: Ver como funciona essa parada de Page
+        Page<CustomerResponseRecordDto> pageResponse = new PageImpl<>(responseList, pageable, 10);
+        return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getOneCustomer(@PathVariable(value="id") UUID id){
         Optional<CustomerModel> customerO = customerService.findById(id);
+
         if(customerO.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found.");
         }
 
-        var customer = customerO.get();
-        var customerResponse = new CustomerResponseRecordDto(
-                customer.getId(),
-                customer.getOwner().getId(),
-                customer.getName(),
-                customer.getCpfCnpj(),
-                customer.getBalance());
+        var customerResponse = new CustomerResponseRecordDto(customerO.get());
 
         return ResponseEntity.status(HttpStatus.OK).body(customerResponse);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateCustomer(@PathVariable(value="id") UUID id,
-                                                @RequestBody @Valid CustomerRecordDto customerRecordDto) {
+                                                @RequestBody @Valid CustomerRequestRecordDto customerRequestRecordDto) {
         Optional<CustomerModel> customerO = customerService.findById(id);
+
         if(customerO.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found.");
         }
+
         var customerModel = customerO.get();
-        BeanUtils.copyProperties(customerRecordDto, customerModel);
 
-        customerService.save(customerModel);
+        BeanUtils.copyProperties(customerRequestRecordDto, customerModel);
 
-        var customerResponse = new CustomerResponseRecordDto(
-                customerModel.getId(),
-                customerModel.getOwner().getId(),
-                customerModel.getName(),
-                customerModel.getCpfCnpj(),
-                customerModel.getBalance());
+        customerService.update(customerModel);
+
+        var customerResponse = new CustomerResponseRecordDto(customerModel);
 
         return ResponseEntity.status(HttpStatus.OK).body(customerResponse);
     }
@@ -128,10 +112,13 @@ public class CustomerController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteCustomer(@PathVariable(value="id") UUID id){
         Optional<CustomerModel> customerO = customerService.findById(id);
+
         if(customerO.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found.");
         }
+
         customerService.delete(customerO.get());
+
         return ResponseEntity.status(HttpStatus.OK).body("Customer deleted successfully.");
     }
 
