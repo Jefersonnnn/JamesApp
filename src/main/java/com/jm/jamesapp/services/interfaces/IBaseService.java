@@ -9,6 +9,8 @@ import java.util.UUID;
 public interface IBaseService<T> {
     T save(T objModel);
 
+    T update(T objModel);
+
     Page<T> findAll(Pageable pageable);
 
     Optional<T> findById(UUID id);
