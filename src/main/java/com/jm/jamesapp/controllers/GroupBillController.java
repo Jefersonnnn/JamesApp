@@ -10,6 +10,7 @@ import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -34,13 +35,12 @@ public class GroupBillController {
         this.groupBillService = groupBillService;
     }
 
-
     @PostMapping
-    public ResponseEntity<Object> saveGroupBill(@RequestBody @Valid GroupBillRequestRecordDto groupBillRequestRecordDto) {
+    public ResponseEntity<GroupBillResponseRecordDto> saveGroupBill(@RequestBody @Valid GroupBillRequestRecordDto groupBillRequestRecordDto) {
         var ownerUser = userService.findById(UUID.fromString(groupBillRequestRecordDto.ownerId()));
 
         if(ownerUser.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Owner not found.");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         var groupBillModel = new GroupBillModel();
@@ -48,107 +48,56 @@ public class GroupBillController {
 
         groupBillModel.setOwner(ownerUser.get());
 
-        if(groupBillRequestRecordDto.customersIds() != null){
-            List<CustomerModel> customerModelList = new ArrayList<>();
-            for (var customerId: groupBillRequestRecordDto.customersIds()) {
-                var customer = customerService.findById(customerId);
-                customer.ifPresent(customerModelList::add);
-            }
-            groupBillModel.setCustomers(customerModelList);
-        }
-
         groupBillService.save(groupBillModel);
 
-        var groupBillResponse = new GroupBillResponseRecordDto(
-                groupBillModel.getId(),
-                groupBillModel.getOwner().getId(),
-                groupBillModel.getName(),
-                groupBillModel.getTotalPayment(),
-                groupBillModel.getDueDateDay(),
-                groupBillModel.getDueDateHour(),
-                groupBillModel.getDescription());
+        var groupBillResponse = new GroupBillResponseRecordDto(groupBillModel);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(groupBillResponse);
     }
 
     @GetMapping
-    public ResponseEntity<Page<GroupBillModel>> getAllGroupBills(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+    public ResponseEntity<Page<GroupBillResponseRecordDto>> getAllGroupBills(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
 
         var groupBillsList = groupBillService.findAll(pageable);
         if(groupBillsList.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-//        var responseList = new ArrayList<GroupBillResponseRecordDto>();
-//
-//        for (var groupBill:groupBillsList) {
-//            var cResponse = new GroupBillResponseRecordDto(
-//                    groupBill.getId(),
-//                    groupBill.getOwner().getId(),
-//                    groupBill.getName(),
-//                    groupBill.getTotalPayment(),
-//                    groupBill.getDueDateDay(),
-//                    groupBill.getDueDateHour(),
-//                    groupBill.getDescription()
-//            );
-//            responseList.add(cResponse);
-//        }
 
-        return ResponseEntity.status(HttpStatus.OK).body(groupBillsList);
+        var responseList = new ArrayList<GroupBillResponseRecordDto>();
+
+        for (var groupBill:groupBillsList) {
+            responseList.add(new GroupBillResponseRecordDto(groupBill));
+        }
+
+        Page<GroupBillResponseRecordDto> pageResponse = new PageImpl<>(responseList, pageable, responseList.size());
+
+        return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getOneGroupBill(@PathVariable(value="id") UUID id){
+    public ResponseEntity<GroupBillResponseRecordDto> getOneGroupBill(@PathVariable(value="id") UUID id){
         Optional<GroupBillModel> groupBillO = groupBillService.findById(id);
         if(groupBillO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("GroupBill not found.");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        var groupBill = groupBillO.get();
-        var groupBillResponse = new GroupBillResponseRecordDto(
-                groupBill.getId(),
-                groupBill.getOwner().getId(),
-                groupBill.getName(),
-                groupBill.getTotalPayment(),
-                groupBill.getDueDateDay(),
-                groupBill.getDueDateHour(),
-                groupBill.getDescription()
-        );
+        var groupBillResponse = new GroupBillResponseRecordDto(groupBillO.get());
 
         return ResponseEntity.status(HttpStatus.OK).body(groupBillResponse);
     }
 
-    @GetMapping("/{id}/customers")
-    public ResponseEntity<Object> getAllCostumersInGroupBill(@PathVariable(value="id") UUID id){
-        Optional<GroupBillModel> groupBillO = groupBillService.findById(id);
-        if(groupBillO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("GroupBill not found.");
-        }
-
-        var groupBill = groupBillO.get();
-
-        return ResponseEntity.status(HttpStatus.OK).body(groupBill.getCustomers());
-    }
-
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateGroupBill(@PathVariable(value="id") UUID id,
+    public ResponseEntity<GroupBillResponseRecordDto> updateGroupBill(@PathVariable(value="id") UUID id,
                                                 @RequestBody @Valid GroupBillRequestRecordDto groupBillRequestRecordDto) {
         Optional<GroupBillModel> groupBillO = groupBillService.findById(id);
         if(groupBillO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("GroupBill not found.");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         var groupBill = groupBillO.get();
         BeanUtils.copyProperties(groupBillRequestRecordDto, groupBill);
         groupBillService.save(groupBill);
 
-        var groupBillResponse = new GroupBillResponseRecordDto(
-                groupBill.getId(),
-                groupBill.getOwner().getId(),
-                groupBill.getName(),
-                groupBill.getTotalPayment(),
-                groupBill.getDueDateDay(),
-                groupBill.getDueDateHour(),
-                groupBill.getDescription()
-        );
+        var groupBillResponse = new GroupBillResponseRecordDto(groupBill);
 
         return ResponseEntity.status(HttpStatus.OK).body(groupBillResponse);
     }
@@ -157,10 +106,10 @@ public class GroupBillController {
     public ResponseEntity<Object> deleteGroupBill(@PathVariable(value="id") UUID id){
         Optional<GroupBillModel> groupBillO = groupBillService.findById(id);
         if(groupBillO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("GroupBill not found.");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         groupBillService.delete(groupBillO.get());
-        return ResponseEntity.status(HttpStatus.OK).body("GroupBill deleted successfully.");
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

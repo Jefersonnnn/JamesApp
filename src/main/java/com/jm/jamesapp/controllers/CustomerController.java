@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
@@ -72,7 +71,7 @@ public class CustomerController {
         }
 
         //Todo: Ver como funciona essa parada de Page
-        Page<CustomerResponseRecordDto> pageResponse = new PageImpl<>(responseList, pageable, 10);
+        Page<CustomerResponseRecordDto> pageResponse = new PageImpl<>(responseList, pageable, responseList.size());
         return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
     }
 

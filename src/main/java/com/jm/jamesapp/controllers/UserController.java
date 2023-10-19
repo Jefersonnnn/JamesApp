@@ -2,11 +2,13 @@ package com.jm.jamesapp.controllers;
 
 
 import com.jm.jamesapp.dtos.requests.UserRequestRecordDto;
+import com.jm.jamesapp.dtos.responses.UserResponseRecordDto;
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,49 +32,67 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserModel> saveUser(@RequestBody @Valid UserRequestRecordDto userRequestRecordDto) {
+    public ResponseEntity<UserResponseRecordDto> saveUser(@RequestBody @Valid UserRequestRecordDto userRequestRecordDto) {
         var userModel = new UserModel();
         BeanUtils.copyProperties(userRequestRecordDto, userModel);
         // UserVO para enviar para o service
         // Service Retornar o UserModel (BD)
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(userModel));
+        UserResponseRecordDto userResponseRecordDto = new UserResponseRecordDto(userService.save(userModel));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userResponseRecordDto);
     }
 
     @GetMapping
-    public ResponseEntity<Page<UserModel>> getAllUsers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
-        return ResponseEntity.status(HttpStatus.OK).body(userService.findAll(pageable));
+    public ResponseEntity<Page<UserResponseRecordDto>> getAllUsers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+        var userList = userService.findAll(pageable);
+
+        if(userList.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        var responseList = new ArrayList<UserResponseRecordDto>();
+
+        for (var user: userList) {
+            responseList.add(new UserResponseRecordDto(user));
+        }
+
+        Page<UserResponseRecordDto> pageResponse = new PageImpl<>(responseList, pageable, responseList.size());
+        return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getOneUser(@PathVariable(value="id") UUID id){
+    public ResponseEntity<UserResponseRecordDto> getOneUser(@PathVariable(value="id") UUID id){
         Optional<UserModel> userO = userService.findById(id);
         if(userO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(userO.get());
+        UserResponseRecordDto userResponseDto = new UserResponseRecordDto(userO.get());
+        return ResponseEntity.status(HttpStatus.OK).body(userResponseDto);
 
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateUser(@PathVariable(value="id") UUID id,
+    public ResponseEntity<UserResponseRecordDto> updateUser(@PathVariable(value="id") UUID id,
                                                 @RequestBody @Valid UserRequestRecordDto userRequestRecordDto) {
         Optional<UserModel> userO = userService.findById(id);
         if(userO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         var userModel = userO.get();
         BeanUtils.copyProperties(userRequestRecordDto, userModel);
-        return ResponseEntity.status(HttpStatus.OK).body(userService.save(userModel));
+
+        UserResponseRecordDto UserResponseDto = new UserResponseRecordDto(userService.update(userModel));
+
+        return ResponseEntity.status(HttpStatus.OK).body(UserResponseDto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteUser(@PathVariable(value="id") UUID id){
         Optional<UserModel> userO = userService.findById(id);
         if(userO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         userService.delete(userO.get());
-        return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully.");
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

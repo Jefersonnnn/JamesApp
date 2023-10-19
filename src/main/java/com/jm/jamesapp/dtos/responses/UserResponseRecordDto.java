@@ -1,5 +1,7 @@
 package com.jm.jamesapp.dtos.responses;
 
+import com.jm.jamesapp.models.UserModel;
+
 import java.util.UUID;
 
 public record UserResponseRecordDto(
@@ -7,6 +9,7 @@ public record UserResponseRecordDto(
         String name,
         String email) {
 
-    public UserResponseRecordDto {
+    public UserResponseRecordDto (UserModel userModel) {
+        this(userModel.getId(), userModel.getName(), userModel.getEmail());
     }
 }

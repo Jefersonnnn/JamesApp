@@ -6,6 +6,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 
 @Entity
@@ -33,8 +35,8 @@ public class GroupBillModel extends BaseModel implements Serializable {
 
     private String description;
 
-    @OneToMany
-    private List<CustomerModel> customers;
+    @ManyToMany(mappedBy = "groupBills")
+    private Set<CustomerModel> customers;
 
     public enum BillingFrequency {
         DAILY("Daily"),
@@ -54,11 +56,11 @@ public class GroupBillModel extends BaseModel implements Serializable {
 
     }
 
-    public List<CustomerModel> getCustomers() {
+    public Set<CustomerModel> getCustomers() {
         return customers;
     }
 
-    public void setCustomers(List<CustomerModel> customers) {
+    public void setCustomers(Set<CustomerModel> customers) {
         this.customers = customers;
     }
 

@@ -6,6 +6,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "TB_CUSTOMERS", uniqueConstraints = {@UniqueConstraint(columnNames = {"cpfCnpj", "owner_id"})})
@@ -15,23 +17,27 @@ public class CustomerModel extends BaseModel implements Serializable {
 
     @ManyToOne
     private UserModel owner;
-
     @Column(nullable = false)
     private String name;
     @Column(nullable = false, length = 14)
     private String cpfCnpj;
-
     private BigDecimal balance;
 
     @ManyToMany
-    private List<GroupBillModel> groupBill;
+    @JoinTable(
+            name = "customer_groupbill",
+            joinColumns = @JoinColumn(name = "customer_id"),
+            inverseJoinColumns = @JoinColumn(name = "groupbill_id")
+    )
+    private Set<GroupBillModel> groupBills;
 
-    public List<GroupBillModel> getGroupBill() {
-        return groupBill;
+
+    public Set<GroupBillModel> getGroupBills() {
+        return groupBills;
     }
 
-    public void setGroupBill(List<GroupBillModel> groupBill) {
-        this.groupBill = groupBill;
+    public void setGroupBills(Set<GroupBillModel> groupBills) {
+        this.groupBills = groupBills;
     }
 
     public UserModel getOwner() {

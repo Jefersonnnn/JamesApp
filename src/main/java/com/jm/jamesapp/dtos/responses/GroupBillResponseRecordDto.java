@@ -1,5 +1,7 @@
 package com.jm.jamesapp.dtos.responses;
 
+import com.jm.jamesapp.models.GroupBillModel;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -12,4 +14,14 @@ public record GroupBillResponseRecordDto(
         Integer dueDateDay,
         Integer dueDateHour,
         String description
-) {}
+) {
+    public GroupBillResponseRecordDto(GroupBillModel groupBillModel) {
+        this(groupBillModel.getId(),
+                groupBillModel.getOwner().getId(),
+                groupBillModel.getName(),
+                groupBillModel.getTotalPayment(),
+                groupBillModel.getDueDateDay(),
+                groupBillModel.getDueDateHour(),
+                groupBillModel.getDescription());
+    }
+}

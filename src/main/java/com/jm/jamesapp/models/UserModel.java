@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table(name = "TB_USERS")
@@ -18,6 +19,12 @@ public class UserModel extends BaseModel implements Serializable {
     private String email;
     @Column(nullable = false)
     private String password;
+
+    @OneToMany(mappedBy = "owner")
+    private List<CustomerModel> customers;
+
+    @OneToMany(mappedBy = "owner")
+    private List<GroupBillModel> groupBills;
 
     public String getName() {
         return name;
