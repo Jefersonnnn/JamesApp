@@ -13,7 +13,7 @@ public class TransactionModel extends BaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private TypeTransaction type;
+    private TypeTransaction typeTransaction;
     @Temporal(TemporalType.TIMESTAMP)
     private Date dueDate;
     @ManyToOne
@@ -25,6 +25,7 @@ public class TransactionModel extends BaseModel implements Serializable {
     private StatusTransaction status;
     private String description;
     private String cancelDescription;
+    private boolean automatic;
 
     public enum TypeTransaction {
         PAYMENT_RECEIVED("Payment received"),
@@ -59,6 +60,14 @@ public class TransactionModel extends BaseModel implements Serializable {
 
     }
 
+    public boolean isAutomatic() {
+        return automatic;
+    }
+
+    public void setAutomatic(boolean automatic) {
+        this.automatic = automatic;
+    }
+
     public UserModel getOwner() {
         return owner;
     }
@@ -67,13 +76,12 @@ public class TransactionModel extends BaseModel implements Serializable {
         this.owner = owner;
     }
 
-
-    public TypeTransaction getType() {
-        return type;
+    public TypeTransaction getTypeTransaction() {
+        return typeTransaction;
     }
 
-    public void setType(TypeTransaction type) {
-        this.type = type;
+    public void setTypeTransaction(TypeTransaction typeTransaction) {
+        this.typeTransaction = typeTransaction;
     }
 
     public StatusTransaction getStatus() {

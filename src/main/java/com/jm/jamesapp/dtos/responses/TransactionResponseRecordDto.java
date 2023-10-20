@@ -1,8 +1,6 @@
 package com.jm.jamesapp.dtos.responses;
 
 import com.jm.jamesapp.models.TransactionModel;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -23,7 +21,7 @@ public record TransactionResponseRecordDto(
                 this(
                         transaction.getId(),
                         transaction.getDueDate(),
-                        transaction.getType(),
+                        transaction.getTypeTransaction(),
                         transaction.getOwner().getId(),
                         transaction.getCustomer().getId(),
                         transaction.getAmount(),

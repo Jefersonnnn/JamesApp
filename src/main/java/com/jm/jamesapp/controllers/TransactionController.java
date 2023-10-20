@@ -57,7 +57,7 @@ public class TransactionController {
         BeanUtils.copyProperties(transactionRequestDto, newTransaction);
 
         newTransaction.setStatus(TransactionModel.StatusTransaction.COMPLETED);
-        newTransaction.setType(TransactionModel.TypeTransaction.PAYMENT_RECEIVED);
+        newTransaction.setTypeTransaction(TransactionModel.TypeTransaction.PAYMENT_RECEIVED);
         newTransaction.setOwner(ownerUser.get());
         newTransaction.setCustomer(customerSender.get());
 
