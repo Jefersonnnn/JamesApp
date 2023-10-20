@@ -4,18 +4,15 @@ import jakarta.persistence.*;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.UUID;
+import java.util.List;
 
 @Entity
 @Table(name = "TB_USERS")
-public class UserModel implements Serializable {
+public class UserModel extends BaseModel implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
     @Column(nullable = false)
     private String name;
     @Column(unique = true, nullable = false)
@@ -23,13 +20,11 @@ public class UserModel implements Serializable {
     @Column(nullable = false)
     private String password;
 
-    public UUID getId() {
-        return id;
-    }
+    @OneToMany(mappedBy = "owner")
+    private List<CustomerModel> customers;
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+    @OneToMany(mappedBy = "owner")
+    private List<GroupBillModel> groupBills;
 
     public String getName() {
         return name;

@@ -3,6 +3,7 @@ package com.jm.jamesapp.services;
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.repositories.UserRepository;
 import com.jm.jamesapp.services.interfaces.IUserService;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,13 @@ public class UserService implements IUserService {
     }
 
     @Override
+    @Transactional
     public UserModel save(UserModel objModel) {
+        return userRepository.save(objModel);
+    }
+
+    @Override
+    public UserModel update(UserModel objModel) {
         return userRepository.save(objModel);
     }
 
@@ -35,6 +42,7 @@ public class UserService implements IUserService {
     }
 
     @Override
+    @Transactional
     public void delete(UserModel objModel) {
         userRepository.delete(objModel);
     }

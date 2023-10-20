@@ -5,34 +5,39 @@ import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Table(name = "TB_CUSTOMERS", uniqueConstraints = {@UniqueConstraint(columnNames = {"cpfCnpj", "owner_id"})})
-public class CustomerModel implements Serializable {
+public class CustomerModel extends BaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
-
     @ManyToOne
     private UserModel owner;
-
     @Column(nullable = false)
     private String name;
     @Column(nullable = false, length = 14)
     private String cpfCnpj;
-
     private BigDecimal balance;
 
-    public UUID getId() {
-        return id;
+    @ManyToMany
+    @JoinTable(
+            name = "customer_groupbill",
+            joinColumns = @JoinColumn(name = "customer_id"),
+            inverseJoinColumns = @JoinColumn(name = "groupbill_id")
+    )
+    private Set<GroupBillModel> groupBills;
+
+
+    public Set<GroupBillModel> getGroupBills() {
+        return groupBills;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public void setGroupBills(Set<GroupBillModel> groupBills) {
+        this.groupBills = groupBills;
     }
 
     public UserModel getOwner() {

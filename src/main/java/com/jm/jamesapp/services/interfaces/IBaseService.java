@@ -2,14 +2,14 @@ package com.jm.jamesapp.services.interfaces;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
 public interface IBaseService<T> {
     T save(T objModel);
+
+    T update(T objModel);
 
     Page<T> findAll(Pageable pageable);
 
