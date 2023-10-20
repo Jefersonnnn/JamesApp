@@ -55,4 +55,9 @@ public class CustomerService implements ICustomerService {
 
         customerRepository.delete(customerModel);
     }
+
+    @Override
+    public Optional<CustomerModel> findByCpf(String cpfCnpj) {
+        return customerRepository.findByCpfCnpj(cpfCnpj);
+    }
 }
