@@ -3,10 +3,12 @@ package com.jm.jamesapp.controllers;
 import com.jm.jamesapp.dtos.requests.TransactionRequestRecordDto;
 import com.jm.jamesapp.dtos.responses.TransactionResponseRecordDto;
 import com.jm.jamesapp.models.TransactionModel;
+import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.ITransactionService;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
+import org.apache.catalina.User;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -39,14 +42,15 @@ public class TransactionController {
 
 
     @PostMapping
-    public ResponseEntity<Object> registerTransaction(@RequestBody @Valid TransactionRequestRecordDto transactionRequestDto) {
-        var ownerUser = userService.findById(UUID.fromString(transactionRequestDto.ownerId()));
+    public ResponseEntity<Object> registerTransaction(@RequestBody @Valid TransactionRequestRecordDto transactionRequestDto, Authentication authentication) {
 
-        if(ownerUser.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Owner not found.");
+        var ownerUser = (UserModel) authentication.getPrincipal();
+
+        if(ownerUser == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        var customerSender = customerService.findByCpf(transactionRequestDto.customerCpfCnpj());
+        var customerSender = customerService.findByCpfCnpjAndOwner(transactionRequestDto.customerCpfCnpj(), ownerUser);
 
         if(customerSender.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found.");
@@ -58,7 +62,7 @@ public class TransactionController {
 
         newTransaction.setStatus(TransactionModel.StatusTransaction.COMPLETED);
         newTransaction.setTypeTransaction(TransactionModel.TypeTransaction.PAYMENT_RECEIVED);
-        newTransaction.setOwner(ownerUser.get());
+        newTransaction.setOwner(ownerUser);
         newTransaction.setCustomer(customerSender.get());
 
         transactionService.register(newTransaction);
@@ -69,13 +73,15 @@ public class TransactionController {
     }
 
     @GetMapping()
-    public ResponseEntity<Page<TransactionResponseRecordDto>> getAllTransactions(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+    public ResponseEntity<Page<TransactionResponseRecordDto>> getAllTransactions(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Authentication authentication){
 
-        var transactionList = transactionService.findAll(pageable);
+        var ownerUser = (UserModel) authentication.getPrincipal();
 
-        if(transactionList.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        var transactionList = transactionService.findAllByOwner(ownerUser);
+
+//        if(transactionList.isEmpty()){
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
 
         var responseList = new ArrayList<TransactionResponseRecordDto>();
 

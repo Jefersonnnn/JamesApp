@@ -9,7 +9,6 @@ import java.util.Date;
 public record TransactionRequestRecordDto(
         Date dueDate,
         String description,
-        @NotNull String ownerId,
         @NotNull String customerCpfCnpj,
         BigDecimal amount
 

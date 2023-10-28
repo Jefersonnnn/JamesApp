@@ -4837,14 +4837,14 @@
       "updated": 1697127878706,
       "link": null,
       "locked": false,
-      "text": "name\nemail\npassword",
+      "text": "username\nemail\npassword",
       "fontSize": 21.189817903086656,
       "fontFamily": 1,
       "textAlign": "left",
       "verticalAlign": "top",
       "baseline": 71,
       "containerId": null,
-      "originalText": "name\nemail\npassword",
+      "originalText": "username\nemail\npassword",
       "lineHeight": 1.25
     },
     {

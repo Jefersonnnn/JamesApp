@@ -3,6 +3,7 @@ package com.jm.jamesapp.controllers;
 import com.jm.jamesapp.dtos.requests.CustomerRequestRecordDto;
 import com.jm.jamesapp.dtos.responses.CustomerResponseRecordDto;
 import com.jm.jamesapp.models.CustomerModel;
+import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -35,18 +38,19 @@ public class CustomerController {
 
 
     @PostMapping
-    public ResponseEntity<Object> saveCustomer(@RequestBody @Valid CustomerRequestRecordDto customerRequestRecordDto) {
-        var ownerUser = userService.findById(UUID.fromString(customerRequestRecordDto.ownerId()));
+    public ResponseEntity<Object> saveCustomer(@RequestBody @Valid CustomerRequestRecordDto customerRequestRecordDto, Authentication authentication) {
 
-        if(ownerUser.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Owner not found.");
+        var ownerUser = (UserModel) authentication.getPrincipal();
+
+        if (ownerUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         var customerModel = new CustomerModel();
 
         BeanUtils.copyProperties(customerRequestRecordDto, customerModel);
 
-        customerModel.setOwner(ownerUser.get());
+        customerModel.setOwner(ownerUser);
         customerService.save(customerModel);
 
         var customerResponse = new CustomerResponseRecordDto(customerModel);
@@ -55,13 +59,15 @@ public class CustomerController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<CustomerResponseRecordDto>> getAllCustomers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+    public ResponseEntity<Page<CustomerResponseRecordDto>> getAllCustomers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Authentication authentication){
 
-        var customersList = customerService.findAll(pageable);
+        var ownerUser = (UserModel) authentication.getPrincipal();
 
-        if(customersList.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        var customersList = customerService.findAllByOwner(ownerUser);
+
+//        if(customersList.isEmpty()){
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
 
         var responseList = new ArrayList<CustomerResponseRecordDto>();
 

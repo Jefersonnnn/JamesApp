@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 
 
 public record CustomerRequestRecordDto(
-        @NotBlank String ownerId,
         @NotBlank String name,
         @NotNull @ValidCpfOrCnpj String cpfCnpj
 ) {}
