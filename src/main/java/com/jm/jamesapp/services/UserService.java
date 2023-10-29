@@ -2,10 +2,12 @@ package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.repositories.UserRepository;
+import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -37,9 +39,16 @@ public class UserService implements IUserService {
         return userRepository.findAll(pageable);
     }
 
-    @Override
+    // Todo: mudar para esse padrão depois?
+//    @Override
+//    public UserModel findById(UUID id) {
+//        Optional<UserModel> userModel = userRepository.findById(id);
+//        return userModel.orElseThrow(() -> new ObjectNotFoundException("User not found! Id: " + id + ", Type: " + UserModel.class.getName()));
+//    }
+
+
     public Optional<UserModel> findById(UUID id) {
-        return userRepository.findById(id);
+       return userRepository.findById(id);
     }
 
     @Override
