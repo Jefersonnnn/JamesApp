@@ -56,4 +56,36 @@ public class TokenService {
     private Instant genExpirationDate(){
         return LocalDateTime.now().plusHours(expirationH).toInstant(ZoneOffset.of(zoneOffSet));
     }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public Integer getExpirationH() {
+        return expirationH;
+    }
+
+    public void setExpirationH(Integer expirationH) {
+        this.expirationH = expirationH;
+    }
+
+    public String getZoneOffSet() {
+        return zoneOffSet;
+    }
+
+    public void setZoneOffSet(String zoneOffSet) {
+        this.zoneOffSet = zoneOffSet;
+    }
+
+    public String getIssuer() {
+        return issuer;
+    }
+
+    public void setIssuer(String issuer) {
+        this.issuer = issuer;
+    }
 }
