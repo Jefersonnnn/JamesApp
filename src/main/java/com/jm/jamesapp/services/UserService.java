@@ -2,12 +2,10 @@ package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.repositories.UserRepository;
-import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
