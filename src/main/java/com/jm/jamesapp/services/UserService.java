@@ -37,8 +37,18 @@ public class UserService implements IUserService {
         return userRepository.findAll(pageable);
     }
 
-    @Override
+    // Todo: mudar para esse padrão depois?
+//    @Override
+//    public UserModel findById(UUID id) {
+//        Optional<UserModel> userModel = userRepository.findById(id);
+//        return userModel.orElseThrow(() -> new ObjectNotFoundException("User not found! Id: " + id + ", Type: " + UserModel.class.getName()));
+//    }
+
+
     public Optional<UserModel> findById(UUID id) {
+        if(id == null){
+            return Optional.empty();
+        }
         return userRepository.findById(id);
     }
 

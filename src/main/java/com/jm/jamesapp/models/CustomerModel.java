@@ -25,7 +25,7 @@ public class CustomerModel extends BaseModel implements Serializable {
 
     @ManyToMany
     @JoinTable(
-            name = "customer_groupbill",
+            name = "TB_CUSTOMERS_GROUPBILLS",
             joinColumns = @JoinColumn(name = "customer_id"),
             inverseJoinColumns = @JoinColumn(name = "groupbill_id")
     )

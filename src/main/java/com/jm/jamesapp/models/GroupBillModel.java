@@ -11,7 +11,7 @@ import java.util.UUID;
 
 
 @Entity
-@Table(name = "TB_GROUP_BILL", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "owner_id"})})
+@Table(name = "TB_GROUP_BILLS", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "owner_id"})})
 public class GroupBillModel extends BaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
