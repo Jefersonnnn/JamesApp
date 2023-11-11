@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.jm.jamesapp.utils.constraints.CpfOrCnpjValidator.cleanStringValue;
+
 @Service
 public class CustomerService implements ICustomerService {
 
@@ -27,6 +29,7 @@ public class CustomerService implements ICustomerService {
     @Transactional
     public CustomerModel save(CustomerModel customerModel) {
         customerModel.setBalance(BigDecimal.valueOf(0.0));
+        customerModel.setCpfCnpj(cleanStringValue(customerModel.getCpfCnpj()));
 
         customerRepository.save(customerModel);
         return customerModel;
@@ -34,6 +37,7 @@ public class CustomerService implements ICustomerService {
 
     @Override
     public CustomerModel update(CustomerModel customerModel) {
+        customerModel.setCpfCnpj(cleanStringValue(customerModel.getCpfCnpj()));
         customerRepository.save(customerModel);
         return customerModel;
     }
@@ -51,10 +55,13 @@ public class CustomerService implements ICustomerService {
     @Override
     @Transactional
     public void delete(CustomerModel customerModel) {
-
         // Regras para o Customers com balance > 0
-
         customerRepository.delete(customerModel);
+    }
+
+    @Override
+    public Optional<CustomerModel> findByIdAndOwner(UUID id, UserModel userModel) {
+        return customerRepository.findByIdAndOwner(id, userModel);
     }
 
     @Override

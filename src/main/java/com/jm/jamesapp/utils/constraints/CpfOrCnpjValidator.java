@@ -15,14 +15,13 @@ public class CpfOrCnpjValidator implements ConstraintValidator<ValidCpfOrCnpj, S
             return false;
         }
 
-        // Remova caracteres não numéricos e verifique o tamanho
-        String cleanValue = value.replaceAll("[^0-9]", "");
+        String cleanValue = cleanStringValue(value);
         if (cleanValue.length() == 11) {
             return validateCpf(cleanValue);
         } else if (cleanValue.length() == 14) {
             return validateCnpj(cleanValue);
         }
-        return false; // Valor não é CPF nem CNPJ
+        return false;
     }
 
     private boolean validateCpf(String cpf) {
@@ -59,11 +58,7 @@ public class CpfOrCnpjValidator implements ConstraintValidator<ValidCpfOrCnpj, S
         if ((rest == 10) || (rest == 11)) {
             rest = 0;
         }
-        if (rest != numbers[10]) {
-            return false;
-        }
-
-        return true;
+        return rest == numbers[10];
     }
 
     private boolean validateCnpj(String cnpj) {
@@ -94,5 +89,10 @@ public class CpfOrCnpjValidator implements ConstraintValidator<ValidCpfOrCnpj, S
         return (firstVerifier == Character.getNumericValue(cnpj.charAt(12)) &&
                 secondVerifier == Character.getNumericValue(cnpj.charAt(13)));
 
+    }
+
+    // Remova caracteres não numéricos e verifique o tamanho
+    public static String cleanStringValue(String value){
+        return value.replaceAll("[^0-9]", "");
     }
 }

@@ -93,13 +93,18 @@ public class GroupBillController {
 
     @PutMapping("/{id}")
     public ResponseEntity<GroupBillResponseRecordDto> updateGroupBill(@PathVariable(value="id") UUID id,
-                                                @RequestBody @Valid GroupBillRequestRecordDto groupBillRequestRecordDto) {
+                                                @RequestBody @Valid GroupBillRequestRecordDto groupBillRequestRecordDto,
+                                                                      Authentication authentication) {
+        var ownerUser = (UserModel) authentication.getPrincipal();
+
         Optional<GroupBillModel> groupBillO = groupBillService.findById(id);
         if(groupBillO.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         var groupBill = groupBillO.get();
         BeanUtils.copyProperties(groupBillRequestRecordDto, groupBill);
+        groupBill.setUpdatedBy(ownerUser.getId());
+
         groupBillService.save(groupBill);
 
         var groupBillResponse = new GroupBillResponseRecordDto(groupBill);
