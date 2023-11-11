@@ -19,7 +19,7 @@ public class CustomerModel extends BaseModel implements Serializable {
     private UserModel owner;
     @Column(nullable = false)
     private String name;
-    @Column(nullable = false, length = 14)
+    @Column(nullable = false, length = 14, unique = true)
     private String cpfCnpj;
     private BigDecimal balance;
 

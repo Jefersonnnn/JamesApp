@@ -5,6 +5,8 @@ import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.repositories.TransactionRepository;
 import com.jm.jamesapp.services.interfaces.ITransactionService;
 import jakarta.transaction.Transactional;
+import jakarta.transaction.TransactionalException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,14 +20,11 @@ public class TransactionService implements ITransactionService {
 
     final TransactionRepository transactionRepository;
 
-    public TransactionService(TransactionRepository transactionRepository) {
-        this.transactionRepository = transactionRepository;
-    }
+    final CustomerService customerService;
 
-    @Override
-    @Transactional
-    public TransactionModel register(TransactionModel transaction) {
-        return transactionRepository.save(transaction);
+    public TransactionService(TransactionRepository transactionRepository, CustomerService customerService) {
+        this.transactionRepository = transactionRepository;
+        this.customerService = customerService;
     }
 
     @Override
@@ -34,7 +33,26 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
+    @Transactional
     public TransactionModel save(TransactionModel transaction) {
+        try {
+            var benifitedCustomer = customerService.findById(transaction.getCustomer().getId());
+            if (benifitedCustomer.isEmpty()){
+                return null;
+            }
+
+            var customer = benifitedCustomer.get();
+            if (transaction.getTypeTransaction() == TransactionModel.TypeTransaction.PAYMENT_RECEIVED){
+                customer.setBalance(customer.getBalance().add(transaction.getAmount()));
+            } else if (transaction.getTypeTransaction() == TransactionModel.TypeTransaction.PAID_GROUPBILL) {
+                customer.setBalance(customer.getBalance().subtract(transaction.getAmount()));
+            }
+            customerService.update(customer);
+        } catch (TransactionalException ex) {
+            transaction.setStatus(TransactionModel.StatusTransaction.ERROR);
+        }
+
+        transaction.setStatus(TransactionModel.StatusTransaction.COMPLETED);
         return transactionRepository.save(transaction);
     }
 

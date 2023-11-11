@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface ITransactionService extends IBaseService<TransactionModel>{
 
-    TransactionModel register(TransactionModel transaction);
-
     List<TransactionModel> findAllByOwner(UserModel userModel);
 
 }

@@ -7,7 +7,7 @@ import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.BeanUtils;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.jm.jamesapp.utils.constraints.CpfOrCnpjValidator.cleanStringValue;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
