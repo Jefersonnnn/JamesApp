@@ -20,14 +20,19 @@ onde um usuário recebe transferencias de cada pessoa, e esta pessoa pode partic
 
 ## Principais Rotas
 
+### Auth
+- **POST /api/auth/register:**
+- **POST /api/auth/login:**
+### Users
 - **GET /api/me:** Retorna o usuário atual
 - **GET /api/users:** Retorna a lista de todos os usuários
 - **GET /api/users/{id}:**
+### Customers
 - **GET /api/customers:** Retorna a lista de todos os clientes.
+### GroupBills
 - **GET /api/groups:** Retorna a lista de todos os grupos.
 - **POST /api/groups:** Cria um novo grupo.
-- **GET /api/bills:** Retorna a lista de todas as faturas.
-- **POST /api/bills:** Cria uma nova fatura.
+### Transactions
 - **GET /api/transactions:** Retorna a lista de todas as transações.
 - **POST /api/transactions:** Registra uma nova transação.
 

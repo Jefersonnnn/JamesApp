@@ -25,14 +25,14 @@ public class UserServiceTest {
     @Test
     public void testCreateUser() {
         UserModel user = new UserModel();
-        user.setName("James Test");
+        user.setUsername("James Test");
         user.setPassword("123james");
         user.setEmail("jamestest@jamesapp.com.br");
 
         UserModel createdUser = userService.save(user);
 
         assert Objects.nonNull(createdUser.getId());
-        assert Objects.equals(user.getName(), createdUser.getName());
+        assert Objects.equals(user.getUsername(), createdUser.getUsername());
     }
 
     @Test

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -57,7 +58,17 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
-    public Optional<CustomerModel> findByCpf(String cpfCnpj) {
+    public Optional<CustomerModel> findByCpfCnpj(String cpfCnpj) {
         return customerRepository.findByCpfCnpj(cpfCnpj);
+    }
+
+    @Override
+    public Optional<CustomerModel> findByCpfCnpjAndOwner(String cpfCnpj, UserModel userModel) {
+        return customerRepository.findByCpfCnpjAndOwner(cpfCnpj, userModel);
+    }
+
+    @Override
+    public List<CustomerModel> findAllByOwner(UserModel userModel) {
+        return customerRepository.findAllByOwner(userModel);
     }
 }

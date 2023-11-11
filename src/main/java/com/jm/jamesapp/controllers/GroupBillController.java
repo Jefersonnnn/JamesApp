@@ -4,6 +4,7 @@ import com.jm.jamesapp.dtos.requests.GroupBillRequestRecordDto;
 import com.jm.jamesapp.dtos.responses.GroupBillResponseRecordDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.GroupBillModel;
+import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.IGroupBillService;
 import com.jm.jamesapp.services.interfaces.IUserService;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -36,17 +38,17 @@ public class GroupBillController {
     }
 
     @PostMapping
-    public ResponseEntity<GroupBillResponseRecordDto> saveGroupBill(@RequestBody @Valid GroupBillRequestRecordDto groupBillRequestRecordDto) {
-        var ownerUser = userService.findById(UUID.fromString(groupBillRequestRecordDto.ownerId()));
+    public ResponseEntity<GroupBillResponseRecordDto> saveGroupBill(@RequestBody @Valid GroupBillRequestRecordDto groupBillRequestRecordDto, Authentication authentication) {
+        var ownerUser = (UserModel) authentication.getPrincipal();
 
-        if(ownerUser.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if(ownerUser == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         var groupBillModel = new GroupBillModel();
         BeanUtils.copyProperties(groupBillRequestRecordDto, groupBillModel);
 
-        groupBillModel.setOwner(ownerUser.get());
+        groupBillModel.setOwner(ownerUser);
 
         groupBillService.save(groupBillModel);
 
@@ -56,12 +58,15 @@ public class GroupBillController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<GroupBillResponseRecordDto>> getAllGroupBills(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+    public ResponseEntity<Page<GroupBillResponseRecordDto>> getAllGroupBills(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Authentication authentication){
 
-        var groupBillsList = groupBillService.findAll(pageable);
-        if(groupBillsList.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        var ownerUser = (UserModel) authentication.getPrincipal();
+
+        var groupBillsList = groupBillService.findAllByOwner(ownerUser);
+
+//        if(groupBillsList.isEmpty()){
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
 
         var responseList = new ArrayList<GroupBillResponseRecordDto>();
 

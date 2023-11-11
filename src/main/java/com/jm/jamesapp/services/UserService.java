@@ -6,6 +6,7 @@ import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -45,5 +46,10 @@ public class UserService implements IUserService {
     @Transactional
     public void delete(UserModel objModel) {
         userRepository.delete(objModel);
+    }
+
+    @Override
+    public UserDetails findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 }
