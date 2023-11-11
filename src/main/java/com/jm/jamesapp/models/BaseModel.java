@@ -27,7 +27,7 @@ public abstract class BaseModel {
     private Date updatedAt;
 
     @Column(name = "updated_by")
-    private String updatedBy;
+    private UUID updatedBy;
 
     public BaseModel() {
         if (this.createdAt == null) {
@@ -39,7 +39,6 @@ public abstract class BaseModel {
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = new Date(System.currentTimeMillis());
-        this.updatedBy = "james.admin";
     }
 
     public UUID getId() {
@@ -74,11 +73,11 @@ public abstract class BaseModel {
         this.updatedAt = updatedAt;
     }
 
-    public String getUpdatedBy() {
+    public UUID getUpdatedBy() {
         return updatedBy;
     }
 
-    public void setUpdatedBy(String updatedBy) {
+    public void setUpdatedBy(UUID updatedBy) {
         this.updatedBy = updatedBy;
     }
 }

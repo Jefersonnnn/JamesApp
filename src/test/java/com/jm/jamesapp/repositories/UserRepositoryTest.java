@@ -6,10 +6,10 @@ import com.jm.jamesapp.utils.constraints.enums.UserRole;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
@@ -55,10 +55,8 @@ class UserRepositoryTest {
     }
 
     private UserModel createUser(UserRequestRecordDto data){
-        UserModel newUser = new UserModel();
-        BeanUtils.copyProperties(data, newUser);
+        UserModel newUser = new UserModel(data);
         this.entityManager.persist(newUser);
         return newUser;
     }
-
 }

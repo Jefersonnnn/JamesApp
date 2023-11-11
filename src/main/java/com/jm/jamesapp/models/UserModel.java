@@ -1,5 +1,6 @@
 package com.jm.jamesapp.models;
 
+import com.jm.jamesapp.dtos.requests.UserRequestRecordDto;
 import com.jm.jamesapp.utils.constraints.enums.UserRole;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -44,6 +45,13 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
         this.email = email;
         this.password = password;
         this.role = role;
+    }
+
+    public UserModel(UserRequestRecordDto data) {
+        this.username = data.username();
+        this.email = data.email();
+        this.password = data.password();
+        this.role = data.role();
     }
 
 

@@ -5,8 +5,11 @@ import com.jm.jamesapp.models.UserModel;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ICustomerService extends IBaseService<CustomerModel> {
+
+    Optional<CustomerModel> findByIdAndOwner(UUID id, UserModel userModel);
 
     Optional<CustomerModel> findByCpfCnpj(String cpfCnpj);
 

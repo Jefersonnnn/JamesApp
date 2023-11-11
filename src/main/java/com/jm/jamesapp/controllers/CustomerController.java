@@ -16,12 +16,13 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.jm.jamesapp.utils.constraints.CpfOrCnpjValidator.cleanStringValue;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -36,21 +37,28 @@ public class CustomerController {
         this.userService = userService;
     }
 
-
     @PostMapping
-    public ResponseEntity<Object> saveCustomer(@RequestBody @Valid CustomerRequestRecordDto customerRequestRecordDto, Authentication authentication) {
+    public ResponseEntity<Object> saveCustomer(@RequestBody @Valid CustomerRequestRecordDto customerRequestRecordDto,
+                                               Authentication authentication) {
 
         var ownerUser = (UserModel) authentication.getPrincipal();
 
         if (ownerUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        var cpfCnpj = customerRequestRecordDto.cpfCnpj();
+        Optional<CustomerModel> existingCustomerModel = customerService.findByCpfCnpjAndOwner(cpfCnpj, ownerUser);
+
+        if (existingCustomerModel.isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
 
         var customerModel = new CustomerModel();
 
-        BeanUtils.copyProperties(customerRequestRecordDto, customerModel);
-
+        customerModel.setName(customerRequestRecordDto.name());
+        customerModel.setCpfCnpj(cpfCnpj);
         customerModel.setOwner(ownerUser);
+
         customerService.save(customerModel);
 
         var customerResponse = new CustomerResponseRecordDto(customerModel);
@@ -96,17 +104,29 @@ public class CustomerController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateCustomer(@PathVariable(value="id") UUID id,
-                                                @RequestBody @Valid CustomerRequestRecordDto customerRequestRecordDto) {
-        Optional<CustomerModel> customerO = customerService.findById(id);
+                                                @RequestBody @Valid CustomerRequestRecordDto customerRequestRecordDto,
+                                                 Authentication authentication) {
+        var ownerUser = (UserModel) authentication.getPrincipal();
+
+        Optional<CustomerModel> customerO = customerService.findByIdAndOwner(id, ownerUser);
 
         if(customerO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        var cpfCnpj = customerRequestRecordDto.cpfCnpj();
+        Optional<CustomerModel> existingCustomerModel = customerService.findByCpfCnpjAndOwner(cpfCnpj, ownerUser);
+
+        if (existingCustomerModel.isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
         var customerModel = customerO.get();
 
-        BeanUtils.copyProperties(customerRequestRecordDto, customerModel);
+        customerModel.setName(customerRequestRecordDto.name());
+        customerModel.setCpfCnpj(cpfCnpj);
 
+        customerModel.setUpdatedBy(ownerUser.getId());
         customerService.update(customerModel);
 
         var customerResponse = new CustomerResponseRecordDto(customerModel);
@@ -115,16 +135,18 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteCustomer(@PathVariable(value="id") UUID id){
-        Optional<CustomerModel> customerO = customerService.findById(id);
+    public ResponseEntity<Object> deleteCustomer(@PathVariable(value="id") UUID id, Authentication authentication){
+        var ownerUser = (UserModel) authentication.getPrincipal();
+
+        Optional<CustomerModel> customerO = customerService.findByIdAndOwner(id, ownerUser);
 
         if(customerO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         customerService.delete(customerO.get());
 
-        return ResponseEntity.status(HttpStatus.OK).body("Customer deleted successfully.");
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }
