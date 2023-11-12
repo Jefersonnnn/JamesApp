@@ -5,9 +5,7 @@ import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Table(name = "TB_CUSTOMERS", uniqueConstraints = {@UniqueConstraint(columnNames = {"cpfCnpj", "owner_id"})})
@@ -31,6 +29,12 @@ public class CustomerModel extends BaseModel implements Serializable {
     )
     private Set<GroupBillModel> groupBills;
 
+    public CustomerModel(UserModel owner, String name, String cpfCnpj) {
+        this.owner = owner;
+        this.name = name;
+        this.cpfCnpj = cpfCnpj;
+        this.balance = new BigDecimal(0);
+    }
 
     public Set<GroupBillModel> getGroupBills() {
         return groupBills;
@@ -70,5 +74,9 @@ public class CustomerModel extends BaseModel implements Serializable {
 
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    public void addBalance(BigDecimal balance) {
+        this.balance = this.balance.add(balance);
     }
 }
