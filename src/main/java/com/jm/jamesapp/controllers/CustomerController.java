@@ -52,11 +52,7 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
-        var customerModel = new CustomerModel();
-
-        customerModel.setName(customerRequestRecordDto.name());
-        customerModel.setCpfCnpj(cpfCnpj);
-        customerModel.setOwner(ownerUser);
+        var customerModel = new CustomerModel(ownerUser, customerRequestRecordDto.name(), cpfCnpj);
 
         customerService.save(customerModel);
 

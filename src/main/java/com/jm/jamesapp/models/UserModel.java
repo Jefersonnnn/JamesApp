@@ -34,6 +34,9 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     @OneToMany(mappedBy = "owner")
     private List<GroupBillModel> groupBills;
 
+    //Todo: Adicionar a lista de Transações e talvez adicionar um método para retornar o saldo ou recalcular o saldo
+    // com base nas transações feitas (indexação?)?
+
     private UserRole role;
 
     public UserModel(){

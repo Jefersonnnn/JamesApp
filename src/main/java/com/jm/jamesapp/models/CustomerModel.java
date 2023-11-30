@@ -17,7 +17,7 @@ public class CustomerModel extends BaseModel implements Serializable {
     private UserModel owner;
     @Column(nullable = false)
     private String name;
-    @Column(nullable = false, length = 14, unique = true)
+    @Column(nullable = false, length = 14)
     private String cpfCnpj;
     private BigDecimal balance;
 
@@ -28,6 +28,8 @@ public class CustomerModel extends BaseModel implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "groupbill_id")
     )
     private Set<GroupBillModel> groupBills;
+
+    public CustomerModel() {}
 
     public CustomerModel(UserModel owner, String name, String cpfCnpj) {
         this.owner = owner;
