@@ -15,7 +15,7 @@ public abstract class BaseModel {
     private UUID id;
 
     @Column(name = "created_by")
-    private String createdBy;
+    private UUID createdBy;
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
@@ -31,7 +31,6 @@ public abstract class BaseModel {
 
     public BaseModel() {
         if (this.createdAt == null) {
-            this.createdBy = "admin";
             this.createdAt = new Date(System.currentTimeMillis());
         }
     }
@@ -49,11 +48,11 @@ public abstract class BaseModel {
         this.id = id;
     }
 
-    public String getCreatedBy() {
+    public UUID getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(String createdBy) {
+    public void setCreatedBy(UUID createdBy) {
         this.createdBy = createdBy;
     }
 

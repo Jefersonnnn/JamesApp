@@ -4,6 +4,8 @@ import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.repositories.CustomerRepository;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
+import com.jm.jamesapp.utils.constraints.CpfOrCnpjValidator;
+import com.jm.jamesapp.utils.constraints.ValidCpfOrCnpj;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -66,11 +68,13 @@ public class CustomerService implements ICustomerService {
 
     @Override
     public Optional<CustomerModel> findByCpfCnpj(String cpfCnpj) {
+        cpfCnpj = CpfOrCnpjValidator.cleanStringValue(cpfCnpj);
         return customerRepository.findByCpfCnpj(cpfCnpj);
     }
 
     @Override
     public Optional<CustomerModel> findByCpfCnpjAndOwner(String cpfCnpj, UserModel userModel) {
+        cpfCnpj = CpfOrCnpjValidator.cleanStringValue(cpfCnpj);
         return customerRepository.findByCpfCnpjAndOwner(cpfCnpj, userModel);
     }
 

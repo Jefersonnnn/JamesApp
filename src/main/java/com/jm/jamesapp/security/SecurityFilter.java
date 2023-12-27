@@ -1,8 +1,6 @@
 package com.jm.jamesapp.security;
 
-import com.jm.jamesapp.security.exceptions.UnauthorizedException;
 import com.jm.jamesapp.services.UserService;
-import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

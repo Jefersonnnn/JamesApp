@@ -2,6 +2,7 @@ package com.jm.jamesapp.controllers;
 
 import com.jm.jamesapp.dtos.requests.TransactionRequestRecordDto;
 import com.jm.jamesapp.dtos.responses.TransactionResponseRecordDto;
+import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.TransactionModel;
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
@@ -43,7 +44,8 @@ public class TransactionController {
 
 
     @PostMapping
-    public ResponseEntity<Object> registerTransaction(@RequestBody @Valid TransactionRequestRecordDto transactionRequestDto, Authentication authentication) {
+    public ResponseEntity<Object> registerTransaction(@RequestBody @Valid TransactionRequestRecordDto transactionRequestDto,
+                                                      Authentication authentication) {
 
         var ownerUser = (UserModel) authentication.getPrincipal();
 
@@ -54,19 +56,12 @@ public class TransactionController {
         var customerSender = customerService.findByCpfCnpjAndOwner(transactionRequestDto.customerCpfCnpj(), ownerUser);
 
         if(customerSender.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        var newTransaction = new TransactionModel();
+        var newTransaction = getTransactionModel(transactionRequestDto, ownerUser, customerSender.get());
 
-        BeanUtils.copyProperties(transactionRequestDto, newTransaction);
-
-        newTransaction.setStatus(TransactionModel.StatusTransaction.COMPLETED);
-        newTransaction.setTypeTransaction(TransactionModel.TypeTransaction.PAYMENT_RECEIVED);
-        newTransaction.setOwner(ownerUser);
-        newTransaction.setCustomer(customerSender.get());
-
-        transactionService.register(newTransaction);
+        transactionService.save(newTransaction);
 
         var transactionResponse = new TransactionResponseRecordDto(newTransaction);
 
@@ -139,6 +134,21 @@ public class TransactionController {
         transactionService.delete(transactionO.get());
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private static TransactionModel getTransactionModel(TransactionRequestRecordDto transactionRequestDto, UserModel ownerUser, CustomerModel customerSender) {
+        var newTransaction = new TransactionModel();
+
+        newTransaction.setDueDate(transactionRequestDto.dueDate());
+        newTransaction.setDescription(transactionRequestDto.description());
+
+        newTransaction.setStatus(TransactionModel.StatusTransaction.COMPLETED);
+        newTransaction.setTypeTransaction(TransactionModel.TypeTransaction.PAYMENT_RECEIVED);
+        newTransaction.setOwner(ownerUser);
+        newTransaction.setCustomer(customerSender);
+
+        newTransaction.setAmount(transactionRequestDto.amount());
+        return newTransaction;
     }
 
 }
