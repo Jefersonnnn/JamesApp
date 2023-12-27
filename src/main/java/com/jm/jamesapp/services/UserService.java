@@ -2,7 +2,9 @@ package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.repositories.UserRepository;
+import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.IUserService;
+import com.jm.jamesapp.utils.constraints.enums.UserRole;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +26,9 @@ public class UserService implements IUserService {
     @Override
     @Transactional
     public UserModel save(UserModel objModel) {
+        if (objModel.getRole() == null){
+            objModel.setRole(UserRole.USER);
+        }
         return userRepository.save(objModel);
     }
 
@@ -37,19 +42,17 @@ public class UserService implements IUserService {
         return userRepository.findAll(pageable);
     }
 
-    // Todo: mudar para esse padrão depois?
-//    @Override
-//    public UserModel findById(UUID id) {
-//        Optional<UserModel> userModel = userRepository.findById(id);
-//        return userModel.orElseThrow(() -> new ObjectNotFoundException("User not found! Id: " + id + ", Type: " + UserModel.class.getName()));
-//    }
-
-
     public Optional<UserModel> findById(UUID id) {
         if(id == null){
             return Optional.empty();
         }
-        return userRepository.findById(id);
+        Optional<UserModel> userModel = userRepository.findById(id);
+
+        if (userModel.isEmpty()) {
+            throw new ObjectNotFoundException(id);
+        }
+
+        return userModel;
     }
 
     @Override

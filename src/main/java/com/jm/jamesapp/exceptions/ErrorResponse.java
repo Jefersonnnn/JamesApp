@@ -12,11 +12,11 @@ public class ErrorResponse {
     private final String message;
     private String stackTrace;
 
+    private List<ValidationError> errors;
+
     public List<ValidationError> getErrors() {
         return errors;
     }
-
-    private List<ValidationError> errors;
 
     public ErrorResponse(int status, String message) {
         this.status = status;

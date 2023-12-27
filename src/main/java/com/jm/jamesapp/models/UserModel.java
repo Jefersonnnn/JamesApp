@@ -1,5 +1,6 @@
 package com.jm.jamesapp.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jm.jamesapp.dtos.requests.UserRequestRecordDto;
 import com.jm.jamesapp.utils.constraints.enums.UserRole;
 import jakarta.persistence.*;
@@ -25,6 +26,7 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     private String username;
     @Column(unique = true, nullable = false)
     private String email;
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
@@ -90,12 +92,18 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     public void setPassword(String password) {
         this.password = password;
     }
-
     @Override
     public String getPassword() {
         return password;
     }
 
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
 
     @Override
     public boolean isAccountNonExpired() {
