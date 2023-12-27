@@ -62,37 +62,57 @@ public class CpfOrCnpjValidator implements ConstraintValidator<ValidCpfOrCnpj, S
     }
 
     private boolean validateCnpj(String cnpj) {
-        // Verifica o tamanho
-        if (cnpj.length() != 14) {
+        if (cnpj == null) return false;
+        if (cnpj.startsWith("00000000000000")) return false;
+        if (cnpj.substring(0, 1).equals(""))
+            return false; //TODO:TESTAR SE PRECISA | Vai quebrar se receber uma string vazia
+
+        int iSoma = 0, iDigito;
+        char[] chCaracteresCNPJ;
+        String strCNPJ_Calculado;
+
+        try {
+            cnpj = cnpj.replace('.', ' ');
+            cnpj = cnpj.replace('/', ' ');
+            cnpj = cnpj.replace('-', ' ');
+            cnpj = cnpj.replaceAll(" ", "");
+            strCNPJ_Calculado = cnpj.substring(0, 12);
+            if (cnpj.length() != 14) return false;
+            chCaracteresCNPJ = cnpj.toCharArray();
+            for (int i = 0; i < 4; i++) {
+                if ((chCaracteresCNPJ[i] - 48 >= 0) && (chCaracteresCNPJ[i] - 48 <= 9)) {
+                    iSoma += (chCaracteresCNPJ[i] - 48) * (6 - (i + 1));
+                }
+            }
+            for (int i = 0; i < 8; i++) {
+                if ((chCaracteresCNPJ[i + 4] - 48 >= 0) && (chCaracteresCNPJ[i + 4] - 48 <= 9)) {
+                    iSoma += (chCaracteresCNPJ[i + 4] - 48) * (10 - (i + 1));
+                }
+            }
+            iDigito = 11 - (iSoma % 11);
+            strCNPJ_Calculado += ((iDigito == 10) || (iDigito == 11)) ? "0" : Integer.toString(iDigito);
+
+            iSoma = 0;
+            for (int i = 0; i < 5; i++) {
+                if ((chCaracteresCNPJ[i] - 48 >= 0) && (chCaracteresCNPJ[i] - 48 <= 9)) {
+                    iSoma += (chCaracteresCNPJ[i] - 48) * (7 - (i + 1));
+                }
+            }
+            for (int i = 0; i < 8; i++) {
+                if ((chCaracteresCNPJ[i + 5] - 48 >= 0) && (chCaracteresCNPJ[i + 5] - 48 <= 9)) {
+                    iSoma += (chCaracteresCNPJ[i + 5] - 48) * (10 - (i + 1));
+                }
+            }
+            iDigito = 11 - (iSoma % 11);
+            strCNPJ_Calculado += ((iDigito == 10) || (iDigito == 11)) ? "0" : Integer.toString(iDigito);
+            return cnpj.equals(strCNPJ_Calculado);
+        } catch (Exception e) {
             return false;
         }
-
-        // Calcula o primeiro dígito verificador
-        int sum = 0;
-        for (int i = 0; i < 12; i++) {
-            int digit = Character.getNumericValue(cnpj.charAt(i));
-            sum += digit * ((5 - i) + 1);
-        }
-        int remainder = sum % 11;
-        int firstVerifier = (remainder < 2) ? 0 : (11 - remainder);
-
-        // Calcula o segundo dígito verificador
-        sum = 0;
-        for (int i = 0; i < 13; i++) {
-            int digit = Character.getNumericValue(cnpj.charAt(i));
-            sum += digit * ((6 - i) + 1);
-        }
-        remainder = sum % 11;
-        int secondVerifier = (remainder < 2) ? 0 : (11 - remainder);
-
-        // Verifica se os dígitos verificadores calculados correspondem aos dígitos reais
-        return (firstVerifier == Character.getNumericValue(cnpj.charAt(12)) &&
-                secondVerifier == Character.getNumericValue(cnpj.charAt(13)));
-
     }
 
     // Remova caracteres não numéricos e verifique o tamanho
-    public static String cleanStringValue(String value){
+    public static String cleanStringValue(String value) {
         return value.replaceAll("[^0-9]", "");
     }
 }
