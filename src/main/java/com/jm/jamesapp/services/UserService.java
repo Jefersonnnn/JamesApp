@@ -6,8 +6,10 @@ import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import com.jm.jamesapp.utils.constraints.enums.UserRole;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -42,17 +44,12 @@ public class UserService implements IUserService {
         return userRepository.findAll(pageable);
     }
 
-    public Optional<UserModel> findById(UUID id) {
-        if(id == null){
-            return Optional.empty();
-        }
-        Optional<UserModel> userModel = userRepository.findById(id);
+    @Nullable
+    public UserModel findById(UUID id) {
+        if (id == null) return null;
 
-        if (userModel.isEmpty()) {
-            throw new ObjectNotFoundException(id);
-        }
-
-        return userModel;
+        Optional<UserModel> user = userRepository.findById(id);
+        return user.orElse(null);
     }
 
     @Override

@@ -6,13 +6,11 @@ import com.jm.jamesapp.repositories.TransactionRepository;
 import com.jm.jamesapp.services.interfaces.ITransactionService;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.TransactionalException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -47,7 +45,7 @@ public class TransactionService implements ITransactionService {
             } else if (transaction.getTypeTransaction() == TransactionModel.TypeTransaction.PAID_GROUPBILL) {
                 customer.setBalance(customer.getBalance().subtract(transaction.getAmount()));
             }
-            customerService.update(customer);
+            customerService.update(customer, ownerUser);
         } catch (TransactionalException ex) {
             transaction.setStatus(TransactionModel.StatusTransaction.ERROR);
         }
@@ -67,7 +65,7 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public Optional<TransactionModel> findById(UUID id) {
+    public UserModel findById(UUID id) {
         return transactionRepository.findById(id);
     }
 

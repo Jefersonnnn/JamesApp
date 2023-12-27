@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -39,7 +38,7 @@ public class GroupBillService implements IGroupBillService {
     }
 
     @Override
-    public Optional<GroupBillModel> findById(UUID id) {
+    public UserModel findById(UUID id) {
         return groupBillRepository.findById(id);
     }
 

@@ -11,9 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "TB_USERS")
@@ -39,6 +37,7 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     //Todo: Adicionar a lista de Transações e talvez adicionar um método para retornar o saldo ou recalcular o saldo
     // com base nas transações feitas (indexação?)?
 
+    @Enumerated(value = EnumType.STRING)
     private UserRole role;
 
     public UserModel(){

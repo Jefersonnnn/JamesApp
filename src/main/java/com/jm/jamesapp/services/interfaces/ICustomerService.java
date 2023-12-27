@@ -1,19 +1,29 @@
 package com.jm.jamesapp.services.interfaces;
 
+import com.jm.jamesapp.dtos.requests.UpdateCustomerDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.UserModel;
+import org.springframework.lang.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ICustomerService extends IBaseService<CustomerModel> {
+public interface ICustomerService {
 
-    Optional<CustomerModel> findByIdAndOwner(UUID id, UserModel userModel);
+    CustomerModel save(CustomerModel customerModel, UserModel userModel);
 
-    Optional<CustomerModel> findByCpfCnpj(String cpfCnpj);
+    CustomerModel update(CustomerModel customer, UpdateCustomerDto saveCustomerDto, UserModel ownerUser);
 
-    Optional<CustomerModel> findByCpfCnpjAndOwner(String cpfCnpj, UserModel userModel);
+    CustomerModel findById(UUID id);
 
-    List<CustomerModel> findAllByOwner(UserModel userModel);
+    void delete(CustomerModel customerModel);
+
+    @Nullable
+    CustomerModel findByIdAndUser(UUID id, UserModel userModel);
+
+    @Nullable
+    CustomerModel findByCpfCnpjAndUser(String cpfCnpj, UserModel userModel);
+
+    List<CustomerModel> findAllByUser(UserModel userModel);
 }

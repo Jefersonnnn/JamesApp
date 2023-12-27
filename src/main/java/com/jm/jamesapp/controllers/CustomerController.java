@@ -1,9 +1,11 @@
 package com.jm.jamesapp.controllers;
 
-import com.jm.jamesapp.dtos.requests.CustomerRequestRecordDto;
+import com.jm.jamesapp.dtos.requests.ApiCustomerRequestDto;
+import com.jm.jamesapp.dtos.requests.UpdateCustomerDto;
 import com.jm.jamesapp.dtos.responses.CustomerResponseRecordDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
@@ -19,9 +21,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
-
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -37,45 +38,32 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> saveCustomer(@RequestBody @Valid CustomerRequestRecordDto customerRequestRecordDto,
+    public ResponseEntity<Object> save(@RequestBody @Valid ApiCustomerRequestDto customerRequestRecordDto,
                                                Authentication authentication) {
 
-        var ownerUser = (UserModel) authentication.getPrincipal();
+        UserModel userModel = (UserModel) authentication.getPrincipal();
+        if (userModel == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        if (ownerUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        var cpfCnpj = customerRequestRecordDto.cpfCnpj();
-        Optional<CustomerModel> existingCustomerModel = customerService.findByCpfCnpjAndOwner(cpfCnpj, ownerUser);
+        var customerModel = new CustomerModel(userModel, customerRequestRecordDto.name(), customerRequestRecordDto.cpfCnpj());
 
-        if (existingCustomerModel.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+        CustomerModel savedCustomer = customerService.save(customerModel, userModel);
 
-        var customerModel = new CustomerModel(ownerUser, customerRequestRecordDto.name(), cpfCnpj);
-
-        customerService.save(customerModel);
-
-        var customerResponse = new CustomerResponseRecordDto(customerModel);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(customerResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new CustomerResponseRecordDto(savedCustomer));
     }
 
     @GetMapping
     public ResponseEntity<Page<CustomerResponseRecordDto>> getAllCustomers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Authentication authentication){
 
-        var ownerUser = (UserModel) authentication.getPrincipal();
+        // TODO: Analisar como deixar esse authentication global para não precisar receber em cada action
+        UserModel ownerUser = (UserModel) authentication.getPrincipal();
 
-        var customersList = customerService.findAllByOwner(ownerUser);
+        // TODO: Analisar para usar os dados do pageable de entrada para buscar somente o necessário
+        List<CustomerModel> customersList = customerService.findAllByUser(ownerUser);
 
-//        if(customersList.isEmpty()){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-
-        var responseList = new ArrayList<CustomerResponseRecordDto>();
+        ArrayList<CustomerResponseRecordDto> responseList = new ArrayList<>();
 
         for (var customer:customersList) {
-            var cResponse = new CustomerResponseRecordDto(customer);
+            CustomerResponseRecordDto cResponse = new CustomerResponseRecordDto(customer);
             responseList.add(cResponse);
         }
 
@@ -85,61 +73,37 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getOneCustomer(@PathVariable(value="id") UUID id){
-        Optional<CustomerModel> customerO = customerService.findById(id);
+    public ResponseEntity<Object> get(@PathVariable(value="id") UUID id, Authentication authentication){
+        UserModel ownerUser = (UserModel) authentication.getPrincipal();
 
-        if(customerO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found.");
-        }
+        CustomerModel customer = customerService.findByIdAndUser(id, ownerUser);
+        if (customer == null) throw new ObjectNotFoundException(id, "customer");
 
-        var customerResponse = new CustomerResponseRecordDto(customerO.get());
-
-        return ResponseEntity.status(HttpStatus.OK).body(customerResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(new CustomerResponseRecordDto(customer));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateCustomer(@PathVariable(value="id") UUID id,
-                                                @RequestBody @Valid CustomerRequestRecordDto customerRequestRecordDto,
+    public ResponseEntity<Object> update(@PathVariable(value="id") UUID id,
+                                                @RequestBody @Valid ApiCustomerRequestDto apiCustomerRequestDto,
                                                  Authentication authentication) {
-        var ownerUser = (UserModel) authentication.getPrincipal();
+        UserModel ownerUser = (UserModel) authentication.getPrincipal();
 
-        Optional<CustomerModel> customerO = customerService.findByIdAndOwner(id, ownerUser);
+        CustomerModel customer = customerService.findByIdAndUser(id, ownerUser);
+        if (customer == null) throw new ObjectNotFoundException(id, "customer");
 
-        if(customerO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        CustomerModel updatedCustomer = customerService.update(customer, new UpdateCustomerDto(apiCustomerRequestDto), ownerUser);
 
-        var cpfCnpj = customerRequestRecordDto.cpfCnpj();
-        Optional<CustomerModel> existingCustomerModel = customerService.findByCpfCnpjAndOwner(cpfCnpj, ownerUser);
-
-        if (existingCustomerModel.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-
-        var customerModel = customerO.get();
-
-        customerModel.setName(customerRequestRecordDto.name());
-        customerModel.setCpfCnpj(cpfCnpj);
-
-        customerModel.setUpdatedBy(ownerUser.getId());
-        customerService.update(customerModel);
-
-        var customerResponse = new CustomerResponseRecordDto(customerModel);
-
-        return ResponseEntity.status(HttpStatus.OK).body(customerResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(new CustomerResponseRecordDto(updatedCustomer));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteCustomer(@PathVariable(value="id") UUID id, Authentication authentication){
+    public ResponseEntity<Object> delete(@PathVariable(value="id") UUID id, Authentication authentication){
         var ownerUser = (UserModel) authentication.getPrincipal();
 
-        Optional<CustomerModel> customerO = customerService.findByIdAndOwner(id, ownerUser);
+        CustomerModel customer = customerService.findByIdAndUser(id, ownerUser);
+        if (customer == null) throw new ObjectNotFoundException(id, "customer");
 
-        if(customerO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        customerService.delete(customerO.get());
+        customerService.delete(customer);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }

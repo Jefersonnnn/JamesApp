@@ -12,8 +12,8 @@ import java.util.UUID;
 @Repository
 public interface CustomerRepository extends JpaRepository<CustomerModel, UUID> {
 
-    Optional<CustomerModel> findByIdAndOwner(UUID id, UserModel userModel);
+    Optional<CustomerModel> findByIdAndUser(UUID id, UserModel userModel);
     Optional<CustomerModel> findByCpfCnpj(String cpfCnpj);
-    Optional<CustomerModel> findByCpfCnpjAndOwner(String cpfCnpj, UserModel userModel);
-    List<CustomerModel> findAllByOwner(UserModel userModel);
+    Optional<CustomerModel> findByCpfCnpjAndUser(String cpfCnpj, UserModel userModel);
+    List<CustomerModel> findAllByUser(UserModel userModel);
 }

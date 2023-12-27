@@ -1,5 +1,7 @@
 package com.jm.jamesapp.exceptions;
 
+import com.jm.jamesapp.security.exceptions.UnauthorizedException;
+import com.jm.jamesapp.services.exceptions.BusinessException;
 import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -36,19 +38,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 "Validation error. Check 'errors' field for details."
         );
 
-        for (FieldError fieldError: exception.getBindingResult().getFieldErrors()){
+        for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
             errorResponse.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
         }
 
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse);
     }
 
-    @ExceptionHandler(AuthenticationException.class)
+    @ExceptionHandler(UnauthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<Object> handleAuthenticationException(
-            AuthenticationException exception,
+            UnauthorizedException exception,
             WebRequest request
-    ){
+    ) {
         final String errorMessage = exception.getMessage();
         return buildErrorResponse(
                 exception,
@@ -61,9 +63,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ResponseEntity<Object> handleDataIntegrityViolationException(
-        DataIntegrityViolationException exception,
-        WebRequest request
-    ){
+            DataIntegrityViolationException exception,
+            WebRequest request
+    ) {
         String errorMessage = exception.getMostSpecificCause().getMessage();
         return buildErrorResponse(
                 exception,
@@ -78,7 +80,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleConstraintViolationException(
             ConstraintViolationException exception,
             WebRequest request
-    ){
+    ) {
         return buildErrorResponse(
                 exception,
                 HttpStatus.CONFLICT,
@@ -89,9 +91,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<Object> handleObjectNotFoundException(
-            ConstraintViolationException exception,
+            ObjectNotFoundException exception,
             WebRequest request
-    ){
+    ) {
         return buildErrorResponse(
                 exception,
                 HttpStatus.NOT_FOUND,
@@ -99,13 +101,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<Object> handleAllUncaughtException(BusinessException exception, WebRequest request) {
+        return buildErrorResponse(exception, exception.getMessage(), HttpStatus.BAD_REQUEST, request);
+    }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<Object> handleAllUncaughtException(
             Exception exception,
             WebRequest request
-    ){
+    ) {
         final String errorMessage = "Unknown error occurred";
         return buildErrorResponse(
                 exception,
@@ -119,7 +125,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             Exception exception,
             HttpStatus httpStatus,
             WebRequest request
-    ){
+    ) {
         return buildErrorResponse(exception, exception.getMessage(), httpStatus, request);
     }
 
@@ -128,9 +134,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             String message,
             HttpStatus httpStatus,
             WebRequest request
-    ){
+    ) {
         ErrorResponse errorResponse = new ErrorResponse(httpStatus.value(), message);
-        if(this.printStackTrace) {
+        if (this.printStackTrace) {
             errorResponse.setStackTrace(ExceptionUtils.getStackTrace(exception));
         }
 

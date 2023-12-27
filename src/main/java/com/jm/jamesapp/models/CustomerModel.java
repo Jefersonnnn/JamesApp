@@ -8,18 +8,17 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 @Entity
-@Table(name = "TB_CUSTOMERS", uniqueConstraints = {@UniqueConstraint(columnNames = {"cpfCnpj", "owner_id"})})
+@Table(name = "TB_CUSTOMERS", uniqueConstraints = {@UniqueConstraint(columnNames = {"cpfCnpj", "user_id"})})
 public class CustomerModel extends BaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
     @ManyToOne
-    private UserModel owner;
+    private UserModel user;
     @Column(nullable = false)
     private String name;
     @Column(nullable = false, length = 14)
     private String cpfCnpj;
-    private BigDecimal balance;
 
     @ManyToMany
     @JoinTable(
@@ -31,11 +30,10 @@ public class CustomerModel extends BaseModel implements Serializable {
 
     public CustomerModel() {}
 
-    public CustomerModel(UserModel owner, String name, String cpfCnpj) {
-        this.owner = owner;
+    public CustomerModel(UserModel user, String name, String cpfCnpj) {
+        this.user = user;
         this.name = name;
         this.cpfCnpj = cpfCnpj;
-        this.balance = new BigDecimal(0);
     }
 
     public Set<GroupBillModel> getGroupBills() {
@@ -44,14 +42,6 @@ public class CustomerModel extends BaseModel implements Serializable {
 
     public void setGroupBills(Set<GroupBillModel> groupBills) {
         this.groupBills = groupBills;
-    }
-
-    public UserModel getOwner() {
-        return owner;
-    }
-
-    public void setOwner(UserModel owner) {
-        this.owner = owner;
     }
 
     public String getName() {
@@ -70,15 +60,11 @@ public class CustomerModel extends BaseModel implements Serializable {
         this.cpfCnpj = cpfCnpj;
     }
 
-    public BigDecimal getBalance() {
-        return balance;
+    public UserModel getUser() {
+        return user;
     }
 
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
-    }
-
-    public void addBalance(BigDecimal balance) {
-        this.balance = this.balance.add(balance);
+    public void setUser(UserModel user) {
+        this.user = user;
     }
 }
