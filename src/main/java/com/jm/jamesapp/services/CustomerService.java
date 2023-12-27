@@ -21,11 +21,8 @@ public class CustomerService implements ICustomerService {
 
     final CustomerRepository customerRepository;
 
-    final TransactionService transactionService;
-
-    public CustomerService(CustomerRepository customerRepository, TransactionService transactionService) {
+    public CustomerService(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
-        this.transactionService = transactionService;
     }
 
     @Override
@@ -57,8 +54,8 @@ public class CustomerService implements ICustomerService {
 
     @Override
     public void delete(CustomerModel customerModel) {
-        double balanceFromCustomer = transactionService.getBalanceFromCustomer(customerModel);
-        if (balanceFromCustomer > 0) throw new BusinessException("Cliente possui saldo pendente");
+//        double balanceFromCustomer = transactionService.getBalanceFromCustomer(customerModel);
+//        if (balanceFromCustomer > 0) throw new BusinessException("Cliente possui saldo pendente");
         // TODO: mas se o guerreiro quiser excluir mesmo assim?
         // TODO: transactionService.calculateCustomerBalance(customerModel) ... valida se tem saldo
 

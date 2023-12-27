@@ -11,7 +11,7 @@ import java.util.UUID;
 
 
 @Entity
-@Table(name = "TB_GROUP_BILLS", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "owner_id"})})
+@Table(name = "TB_GROUP_BILLS", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "user_id"})})
 public class GroupBillModel extends BaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -26,12 +26,8 @@ public class GroupBillModel extends BaseModel implements Serializable {
     private BigDecimal totalPayment;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private BillingFrequency billingFrequency;
-    @Column(nullable = false)
-    private Integer dueDateDay;
-
-    @Column(nullable = false)
-    private Integer dueDateHour;
 
     private String description;
 
@@ -89,22 +85,6 @@ public class GroupBillModel extends BaseModel implements Serializable {
 
     public void setBillingFrequency(BillingFrequency billingFrequency) {
         this.billingFrequency = billingFrequency;
-    }
-
-    public Integer getDueDateDay() {
-        return dueDateDay;
-    }
-
-    public void setDueDateDay(Integer dueDateDay) {
-        this.dueDateDay = dueDateDay;
-    }
-
-    public Integer getDueDateHour() {
-        return dueDateHour;
-    }
-
-    public void setDueDateHour(Integer dueDateHour) {
-        this.dueDateHour = dueDateHour;
     }
 
     public String getDescription() {

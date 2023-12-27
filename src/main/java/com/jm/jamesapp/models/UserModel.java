@@ -27,10 +27,10 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "user")
     private List<CustomerModel> customers;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "user")
     private List<GroupBillModel> groupBills;
 
     //Todo: Adicionar a lista de Transações e talvez adicionar um método para retornar o saldo ou recalcular o saldo

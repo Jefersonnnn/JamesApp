@@ -5,6 +5,7 @@ import com.jm.jamesapp.dtos.responses.TransactionResponseDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.TransactionModel;
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.dto.SaveTransactionDto;
 import com.jm.jamesapp.models.dto.UpdateTransactionDto;
 import com.jm.jamesapp.security.exceptions.UnauthorizedException;
 import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
@@ -43,24 +44,19 @@ public class TransactionController {
 
 
     @PostMapping
-    public ResponseEntity<TransactionResponseDto> registerTransaction(@RequestBody @Valid ApiTransactionRequestDto transactionRequestDto,
+    public ResponseEntity<TransactionResponseDto> registerTransaction(@RequestBody @Valid ApiTransactionRequestDto apiTransactionRequestDto,
                                                                       Authentication authentication) {
 
         UserModel userModel = (UserModel) authentication.getPrincipal();
         if(userModel == null) throw new UnauthorizedException();
 
-        var customerSender = customerService.findByCpfCnpjAndUser(transactionRequestDto.customerCpfCnpj(), userModel);
+        var customerSender = customerService.findByCpfCnpjAndUser(apiTransactionRequestDto.customerCpfCnpj(), userModel);
 
-        if(customerSender == null) {
-            // Todo: Gerar uma execão personaliada?
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        if(customerSender == null) throw new ObjectNotFoundException(apiTransactionRequestDto.customerCpfCnpj(), "customer");
 
-        var newTransaction = getTransactionModel(transactionRequestDto, userModel, customerSender);
+        var transaction = transactionService.save(new SaveTransactionDto(apiTransactionRequestDto), userModel);
 
-        transactionService.save(newTransaction);
-
-        var transactionResponse = new TransactionResponseDto(newTransaction);
+        var transactionResponse = new TransactionResponseDto(transaction);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(transactionResponse);
     }
@@ -120,21 +116,6 @@ public class TransactionController {
         transactionService.delete(transaction);
 
         return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    private static TransactionModel getTransactionModel(ApiTransactionRequestDto transactionRequestDto, UserModel userModel, CustomerModel customerSender) {
-        var newTransaction = new TransactionModel();
-
-        newTransaction.setDueDate(transactionRequestDto.dueDate());
-        newTransaction.setDescription(transactionRequestDto.description());
-
-        newTransaction.setStatus(TransactionModel.StatusTransaction.COMPLETED);
-        newTransaction.setTypeTransaction(TransactionModel.TypeTransaction.PAYMENT_RECEIVED);
-        newTransaction.setUser(userModel);
-        newTransaction.setCustomer(customerSender);
-
-        newTransaction.setAmount(transactionRequestDto.amount());
-        return newTransaction;
     }
 
 }

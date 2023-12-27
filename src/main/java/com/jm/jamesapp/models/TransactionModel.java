@@ -13,6 +13,7 @@ public class TransactionModel extends BaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @Enumerated(EnumType.STRING)
     private TypeTransaction typeTransaction;
     @Temporal(TemporalType.TIMESTAMP)
     private Date dueDate;
@@ -22,6 +23,7 @@ public class TransactionModel extends BaseModel implements Serializable {
     private CustomerModel customer;
     private BigDecimal amount;
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private StatusTransaction status;
     private String description;
     private String cancelDescription;

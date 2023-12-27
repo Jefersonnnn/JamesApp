@@ -2,13 +2,15 @@ package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.GroupBillModel;
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.dto.SaveGroupBillDto;
+import com.jm.jamesapp.models.dto.UpdateGroupBillDto;
 import com.jm.jamesapp.repositories.GroupBillRepository;
+import com.jm.jamesapp.services.exceptions.BusinessException;
 import com.jm.jamesapp.services.interfaces.IGroupBillService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -21,13 +23,28 @@ public class GroupBillService implements IGroupBillService {
     }
 
     @Override
-    public GroupBillModel save(GroupBillModel objModel) {
-        return groupBillRepository.save(objModel);
+    public GroupBillModel save(SaveGroupBillDto saveGroupBillDto, UserModel userModel) {
+        GroupBillModel groupBill = new GroupBillModel();
+        groupBill.setUser(userModel);
+        groupBill.setName(saveGroupBillDto.getName());
+        groupBill.setBillingFrequency(saveGroupBillDto.getBillingFrequency());
+        groupBill.setDescription(saveGroupBillDto.getDescription());
+        groupBill.setTotalPayment(saveGroupBillDto.getTotalPayment());
+        return groupBillRepository.save(groupBill);
     }
 
     @Override
-    public GroupBillModel update(GroupBillModel objModel) {
-        return groupBillRepository.save(objModel);
+    public GroupBillModel update(GroupBillModel groupBill, UpdateGroupBillDto updateGroupBillDto, UserModel userModel) {
+        validateUpdate(updateGroupBillDto, userModel);
+
+        groupBillRepository.findByIdAndUser(updateGroupBillDto.getId(), userModel);
+        groupBill.setUser(userModel);
+        groupBill.setName(updateGroupBillDto.getName());
+        groupBill.setBillingFrequency(updateGroupBillDto.getBillingFrequency());
+        groupBill.setDescription(updateGroupBillDto.getDescription());
+        groupBill.setTotalPayment(updateGroupBillDto.getTotalPayment());
+
+        return groupBillRepository.save(groupBill);
     }
 
     @Override
@@ -47,7 +64,16 @@ public class GroupBillService implements IGroupBillService {
 
 
     @Override
-    public List<GroupBillModel> findAllByUser(Pageable pageable, UserModel userModel) {
+    public Page<GroupBillModel> findAllByUser(Pageable pageable, UserModel userModel) {
         return groupBillRepository.findAllByUser(pageable, userModel);
+    }
+
+    public GroupBillModel findByIdAndUser(UUID id, UserModel userModel){
+        return groupBillRepository.findByIdAndUser(id, userModel).orElse(null);
+    }
+
+    private void validateUpdate(UpdateGroupBillDto groupBillDto, UserModel userModel) {
+        boolean isCustomerAlreadyRegistered = findByIdAndUser(groupBillDto.getId(), userModel) != null;
+        if (isCustomerAlreadyRegistered) throw new BusinessException("Você possui esse Grupo com o ID informado.");
     }
 }

@@ -11,4 +11,7 @@ public class ObjectNotFoundException extends RuntimeException {
     public ObjectNotFoundException(UUID id, String resourceName) {
         super(resourceName + " not found. Id:" + id);
     }
+    public ObjectNotFoundException(String message, String resourceName) {
+        super(resourceName + " not found.:" + message);
+    }
 }

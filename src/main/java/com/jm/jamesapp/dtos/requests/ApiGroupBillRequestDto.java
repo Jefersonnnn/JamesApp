@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-public record GroupBillRequestRecordDto(
+public record ApiGroupBillRequestDto(
         @NotBlank String name,
         @NotNull @DecimalMin("0.0") BigDecimal totalPayment,
         @NotNull GroupBillModel.BillingFrequency billingFrequency,

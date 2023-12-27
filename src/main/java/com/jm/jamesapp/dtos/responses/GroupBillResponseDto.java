@@ -6,22 +6,18 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 
-public record GroupBillResponseRecordDto(
+public record GroupBillResponseDto(
         UUID id,
         UUID ownerId,
         String name,
         BigDecimal totalPayment,
-        Integer dueDateDay,
-        Integer dueDateHour,
         String description
 ) {
-    public GroupBillResponseRecordDto(GroupBillModel groupBillModel) {
+    public GroupBillResponseDto(GroupBillModel groupBillModel) {
         this(groupBillModel.getId(),
                 groupBillModel.getUser().getId(),
                 groupBillModel.getName(),
                 groupBillModel.getTotalPayment(),
-                groupBillModel.getDueDateDay(),
-                groupBillModel.getDueDateHour(),
                 groupBillModel.getDescription());
     }
 }
