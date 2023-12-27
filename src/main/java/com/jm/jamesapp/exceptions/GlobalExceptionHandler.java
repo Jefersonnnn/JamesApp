@@ -3,6 +3,7 @@ package com.jm.jamesapp.exceptions;
 import com.jm.jamesapp.security.exceptions.UnauthorizedException;
 import com.jm.jamesapp.services.exceptions.BusinessException;
 import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,22 +12,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler {
 
     @Value("${server.error.include-exception}")
     private boolean printStackTrace;
 
-    @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException exception,
             HttpHeaders headers,
@@ -46,10 +44,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<Object> handleAuthenticationException(
             UnauthorizedException exception,
-            WebRequest request
+            HttpServletRequest request
     ) {
         final String errorMessage = exception.getMessage();
         return buildErrorResponse(
@@ -64,7 +61,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ResponseEntity<Object> handleDataIntegrityViolationException(
             DataIntegrityViolationException exception,
-            WebRequest request
+            HttpServletRequest request
     ) {
         String errorMessage = exception.getMostSpecificCause().getMessage();
         return buildErrorResponse(
@@ -76,10 +73,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public ResponseEntity<Object> handleConstraintViolationException(
             ConstraintViolationException exception,
-            WebRequest request
+            HttpServletRequest request
     ) {
         return buildErrorResponse(
                 exception,
@@ -92,7 +88,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<Object> handleObjectNotFoundException(
             ObjectNotFoundException exception,
-            WebRequest request
+            HttpServletRequest request
     ) {
         return buildErrorResponse(
                 exception,
@@ -103,7 +99,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     // TODO: TIREI O @ResponseStatus, testar se precisa mesmo
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<Object> handleAllUncaughtException(BusinessException exception, WebRequest request) {
+    public ResponseEntity<Object> handleAllUncaughtException(BusinessException exception, HttpServletRequest request) {
         return buildErrorResponse(exception, exception.getMessage(), HttpStatus.BAD_REQUEST, request);
     }
 
@@ -111,7 +107,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<Object> handleAllUncaughtException(
             Exception exception,
-            WebRequest request
+            HttpServletRequest request
     ) {
         final String errorMessage = "Unknown error occurred";
         return buildErrorResponse(
@@ -125,7 +121,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<Object> buildErrorResponse(
             Exception exception,
             HttpStatus httpStatus,
-            WebRequest request
+            HttpServletRequest request
     ) {
         return buildErrorResponse(exception, exception.getMessage(), httpStatus, request);
     }
@@ -134,7 +130,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             Exception exception,
             String message,
             HttpStatus httpStatus,
-            WebRequest request
+            HttpServletRequest request
     ) {
         ErrorResponse errorResponse = new ErrorResponse(httpStatus.value(), message);
         if (this.printStackTrace) {

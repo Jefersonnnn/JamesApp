@@ -1,5 +1,6 @@
 package com.jm.jamesapp.services;
 
+import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.GroupBillModel;
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.models.dto.SaveGroupBillDto;
@@ -70,6 +71,12 @@ public class GroupBillService implements IGroupBillService {
 
     public GroupBillModel findByIdAndUser(UUID id, UserModel userModel){
         return groupBillRepository.findByIdAndUser(id, userModel).orElse(null);
+    }
+
+    @Override
+    public void addCustomer(GroupBillModel groupBill, CustomerModel customer) {
+        groupBill.getCustomers().add(customer);
+        groupBillRepository.save(groupBill);
     }
 
     private void validateUpdate(UpdateGroupBillDto groupBillDto, UserModel userModel) {

@@ -1,5 +1,6 @@
 package com.jm.jamesapp.services.interfaces;
 
+import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.GroupBillModel;
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.models.dto.SaveGroupBillDto;
@@ -31,4 +32,7 @@ public interface IGroupBillService{
 
     @Nullable
     GroupBillModel findByIdAndUser(UUID id, UserModel userModel);
+
+    @Transactional
+    void addCustomer(GroupBillModel groupBill, CustomerModel customer);
 }
