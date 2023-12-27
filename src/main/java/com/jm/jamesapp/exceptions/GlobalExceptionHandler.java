@@ -101,6 +101,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
+    // TODO: TIREI O @ResponseStatus, testar se precisa mesmo
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Object> handleAllUncaughtException(BusinessException exception, WebRequest request) {
         return buildErrorResponse(exception, exception.getMessage(), HttpStatus.BAD_REQUEST, request);

@@ -38,7 +38,7 @@ public class CustomerService implements ICustomerService {
 
     @Override
     @Transactional
-    public CustomerModel update(CustomerModel customer, UpdateCustomerDto saveCustomerDto, UserModel ownerUser) {
+    public CustomerModel update(CustomerModel customer, UpdateCustomerDto saveCustomerDto, UserModel ownerUser) { // TODO: REPLICAR DTO PARA SAVE
         validateUpdate(saveCustomerDto, ownerUser);
 
         customer.setName(saveCustomerDto.name);
@@ -73,6 +73,7 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
+    @Nullable
     public CustomerModel findByCpfCnpjAndUser(String cpfCnpj, UserModel userModel) {
         return customerRepository.findByCpfCnpjAndUser(CpfOrCnpjValidator.cleanStringValue(cpfCnpj), userModel).orElse(null);
     }

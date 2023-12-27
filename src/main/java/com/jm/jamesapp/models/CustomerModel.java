@@ -36,6 +36,7 @@ public class CustomerModel extends BaseModel implements Serializable {
         this.cpfCnpj = cpfCnpj;
     }
 
+    // TODO: TIRAR GET/SET
     public Set<GroupBillModel> getGroupBills() {
         return groupBills;
     }
