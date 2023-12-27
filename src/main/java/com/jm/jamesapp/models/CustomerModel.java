@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 @Entity
+//TODO: Interceptar criação da tabela para adicionar prefixo tb_ automaticamente
 @Table(name = "TB_CUSTOMERS", uniqueConstraints = {@UniqueConstraint(columnNames = {"cpfCnpj", "user_id"})})
 public class CustomerModel extends BaseModel implements Serializable {
     @Serial

@@ -37,7 +37,7 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     //Todo: Adicionar a lista de Transações e talvez adicionar um método para retornar o saldo ou recalcular o saldo
     // com base nas transações feitas (indexação?)?
 
-    @Enumerated(value = EnumType.STRING)
+    @Enumerated(value = EnumType.STRING) //TODO: Definir para todo Enum ter essa annotation por default no sistema
     private UserRole role;
 
     public UserModel(){

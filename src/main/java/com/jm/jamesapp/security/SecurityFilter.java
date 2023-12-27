@@ -34,7 +34,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         if(token != null) {
             String userId = tokenService.validateToken(token);
             UserModel user = userService.findById(UUID.fromString(userId));
-            if (user == null) throw new UnauthorizedException();
+            if (user == null) throw new UnauthorizedException(); //TODO: Testar
 
             var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
