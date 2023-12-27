@@ -2,14 +2,9 @@ package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.repositories.UserRepository;
-import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.IUserService;
-import com.jm.jamesapp.utils.constraints.enums.UserRole;
-import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.lang.Nullable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -26,10 +21,9 @@ public class UserService implements IUserService {
     }
 
     @Override
-    @Transactional
     public UserModel save(UserModel objModel) {
         if (objModel.getRole() == null){
-            objModel.setRole(UserRole.USER);
+            objModel.setRole(UserModel.UserRole.USER);
         }
         return userRepository.save(objModel);
     }
@@ -44,7 +38,6 @@ public class UserService implements IUserService {
         return userRepository.findAll(pageable);
     }
 
-    @Nullable
     public UserModel findById(UUID id) {
         if (id == null) return null;
 
@@ -53,7 +46,6 @@ public class UserService implements IUserService {
     }
 
     @Override
-    @Transactional
     public void delete(UserModel objModel) {
         userRepository.delete(objModel);
     }

@@ -1,16 +1,18 @@
 package com.jm.jamesapp.services;
 
+import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.TransactionModel;
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.dto.UpdateTransactionDto;
 import com.jm.jamesapp.repositories.TransactionRepository;
 import com.jm.jamesapp.services.interfaces.ITransactionService;
+import jakarta.annotation.Nullable;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.TransactionalException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,20 +28,20 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public List<TransactionModel> findAllByOwner(UserModel userModel) {
-        return transactionRepository.findAllByOwner(userModel);
+    public Page<TransactionModel> findAllByUser(Pageable pageable, UserModel userModel) {
+        return transactionRepository.findAllByUser(pageable, userModel);
     }
 
     @Override
-    @Transactional
     public TransactionModel save(TransactionModel transaction) {
+        //Todo: Colocar no padrão de entrada de dados
         try {
             var benifitedCustomer = customerService.findById(transaction.getCustomer().getId());
-            if (benifitedCustomer.isEmpty()){
+            // Todo: se o cara receber o dinheiro de alguem que não está cadastrado?
+            if (benifitedCustomer == null){
                 return null;
             }
 
-            var customer = benifitedCustomer.get();
             if (transaction.getTypeTransaction() == TransactionModel.TypeTransaction.PAYMENT_RECEIVED){
                 customer.setBalance(customer.getBalance().add(transaction.getAmount()));
             } else if (transaction.getTypeTransaction() == TransactionModel.TypeTransaction.PAID_GROUPBILL) {
@@ -55,7 +57,7 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public TransactionModel update(TransactionModel transaction) {
+    public TransactionModel update(TransactionModel transaction, UpdateTransactionDto updateTransactionDto, UserModel userModel) {
         return transactionRepository.save(transaction);
     }
 
@@ -65,8 +67,8 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public UserModel findById(UUID id) {
-        return transactionRepository.findById(id);
+    public TransactionModel findByIdAndUser(UUID id, UserModel userModel) {
+        return transactionRepository.findByIdAndUser(id, userModel).orElse(null);
     }
 
     @Override
@@ -75,5 +77,15 @@ public class TransactionService implements ITransactionService {
         transactionRepository.delete(transaction);
     }
 
+    @Override
+    public double getBalanceFromCustomer(CustomerModel customerModel){
+        //TODO FAZER
+        return 0.0;
+    }
 
+    @Override
+    public double getBalanceFromUser(UserModel userModel) {
+        //TODO: Fazer
+        return 0;
+    }
 }

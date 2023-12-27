@@ -1,28 +1,27 @@
 package com.jm.jamesapp.controllers;
 
-import com.jm.jamesapp.dtos.requests.TransactionRequestRecordDto;
-import com.jm.jamesapp.dtos.responses.TransactionResponseRecordDto;
+import com.jm.jamesapp.dtos.requests.ApiTransactionRequestDto;
+import com.jm.jamesapp.dtos.responses.TransactionResponseDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.TransactionModel;
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.dto.UpdateTransactionDto;
+import com.jm.jamesapp.security.exceptions.UnauthorizedException;
+import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.ITransactionService;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
-import org.apache.catalina.User;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,99 +43,86 @@ public class TransactionController {
 
 
     @PostMapping
-    public ResponseEntity<Object> registerTransaction(@RequestBody @Valid TransactionRequestRecordDto transactionRequestDto,
-                                                      Authentication authentication) {
+    public ResponseEntity<TransactionResponseDto> registerTransaction(@RequestBody @Valid ApiTransactionRequestDto transactionRequestDto,
+                                                                      Authentication authentication) {
 
-        var ownerUser = (UserModel) authentication.getPrincipal();
+        UserModel userModel = (UserModel) authentication.getPrincipal();
+        if(userModel == null) throw new UnauthorizedException();
 
-        if(ownerUser == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        var customerSender = customerService.findByCpfCnpjAndUser(transactionRequestDto.customerCpfCnpj(), userModel);
 
-        var customerSender = customerService.findByCpfCnpjAndOwner(transactionRequestDto.customerCpfCnpj(), ownerUser);
-
-        if(customerSender.isEmpty()){
+        if(customerSender == null) {
+            // Todo: Gerar uma execão personaliada?
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        var newTransaction = getTransactionModel(transactionRequestDto, ownerUser, customerSender.get());
+        var newTransaction = getTransactionModel(transactionRequestDto, userModel, customerSender);
 
         transactionService.save(newTransaction);
 
-        var transactionResponse = new TransactionResponseRecordDto(newTransaction);
+        var transactionResponse = new TransactionResponseDto(newTransaction);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(transactionResponse);
     }
 
     @GetMapping()
-    public ResponseEntity<Page<TransactionResponseRecordDto>> getAllTransactions(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Authentication authentication){
+    public ResponseEntity<Page<TransactionResponseDto>> getAllTransactions(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Authentication authentication){
 
-        var ownerUser = (UserModel) authentication.getPrincipal();
+        UserModel userModel = (UserModel) authentication.getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
 
-        var transactionList = transactionService.findAllByOwner(ownerUser);
+        Page<TransactionModel> transactionList = transactionService.findAllByUser(pageable, userModel);
 
-//        if(transactionList.isEmpty()){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
+        Page<TransactionResponseDto> responseList = transactionList.map(TransactionResponseDto::new);
 
-        var responseList = new ArrayList<TransactionResponseRecordDto>();
-
-        for (var transaction:transactionList) {
-            var tResponse = new TransactionResponseRecordDto(transaction);
-            responseList.add(tResponse);
-        }
-
-        Page<TransactionResponseRecordDto> pageResponse = new PageImpl<>(responseList, pageable, responseList.size());
-        return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
+//        Page<TransactionResponseDto> pageResponse = new PageImpl<>(responseList, pageable, responseList.size());
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TransactionResponseRecordDto> getOneTransaction(@PathVariable(value="id") UUID id){
-        Optional<TransactionModel> transactionO = transactionService.findById(id);
+    public ResponseEntity<TransactionResponseDto> get(@PathVariable(value="id") UUID id, Authentication authentication){
+        UserModel userModel = (UserModel) authentication.getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
 
-        if(transactionO.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        TransactionModel transaction = transactionService.findByIdAndUser(id, userModel);
 
-        var transactionResponse = new TransactionResponseRecordDto(transactionO.get());
+        if(transaction == null) throw new ObjectNotFoundException(id, "transaction");
 
-        return ResponseEntity.status(HttpStatus.OK).body(transactionResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(new TransactionResponseDto(transaction));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateTransaction(@PathVariable(value="id") UUID id,
-                                                @RequestBody @Valid TransactionRequestRecordDto transactionRequestRecordDto) {
-        Optional<TransactionModel> transactionO = transactionService.findById(id);
+    public ResponseEntity<TransactionResponseDto> updateTransaction(@PathVariable(value="id") UUID id,
+                                                                    @RequestBody @Valid ApiTransactionRequestDto transactionRequestDto, Authentication authentication) {
+        UserModel userModel = (UserModel) authentication.getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
 
-        if(transactionO.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        TransactionModel transaction = transactionService.findByIdAndUser(id, userModel);
 
-        var transaction = transactionO.get();
+        if(transaction == null) throw new ObjectNotFoundException(id, "transaction");
 
-        BeanUtils.copyProperties(transactionRequestRecordDto, transaction);
+        transactionService.update(transaction, new UpdateTransactionDto(transactionRequestDto), userModel);
 
-        transactionService.update(transaction);
-
-        var transactionResponse = new TransactionResponseRecordDto(transaction);
+        var transactionResponse = new TransactionResponseDto(transaction);
 
         return ResponseEntity.status(HttpStatus.OK).body(transactionResponse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteTransaction(@PathVariable(value="id") UUID id){
-        Optional<TransactionModel> transactionO = transactionService.findById(id);
+    public ResponseEntity<Object> deleteTransaction(@PathVariable(value="id") UUID id, Authentication authentication){
+        UserModel userModel = (UserModel) authentication.getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
 
-        if(transactionO.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        TransactionModel transaction = transactionService.findByIdAndUser(id, userModel);
 
-        transactionService.delete(transactionO.get());
+        if(transaction == null) throw new ObjectNotFoundException(id, "transaction");
+
+        transactionService.delete(transaction);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private static TransactionModel getTransactionModel(TransactionRequestRecordDto transactionRequestDto, UserModel ownerUser, CustomerModel customerSender) {
+    private static TransactionModel getTransactionModel(ApiTransactionRequestDto transactionRequestDto, UserModel userModel, CustomerModel customerSender) {
         var newTransaction = new TransactionModel();
 
         newTransaction.setDueDate(transactionRequestDto.dueDate());
@@ -144,7 +130,7 @@ public class TransactionController {
 
         newTransaction.setStatus(TransactionModel.StatusTransaction.COMPLETED);
         newTransaction.setTypeTransaction(TransactionModel.TypeTransaction.PAYMENT_RECEIVED);
-        newTransaction.setOwner(ownerUser);
+        newTransaction.setUser(userModel);
         newTransaction.setCustomer(customerSender);
 
         newTransaction.setAmount(transactionRequestDto.amount());

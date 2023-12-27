@@ -48,7 +48,7 @@ public class GroupBillController {
         var groupBillModel = new GroupBillModel();
         BeanUtils.copyProperties(groupBillRequestRecordDto, groupBillModel);
 
-        groupBillModel.setOwner(ownerUser);
+        groupBillModel.setUser(ownerUser);
 
         groupBillService.save(groupBillModel);
 
@@ -81,7 +81,7 @@ public class GroupBillController {
 
     @GetMapping("/{id}")
     public ResponseEntity<GroupBillResponseRecordDto> getOneGroupBill(@PathVariable(value="id") UUID id){
-        Optional<GroupBillModel> groupBillO = groupBillService.findById(id);
+        GroupBillModel groupBillO = groupBillService.findById(id);
         if(groupBillO.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -97,7 +97,7 @@ public class GroupBillController {
                                                                       Authentication authentication) {
         var ownerUser = (UserModel) authentication.getPrincipal();
 
-        Optional<GroupBillModel> groupBillO = groupBillService.findById(id);
+        GroupBillModel groupBillO = groupBillService.findById(id);
         if(groupBillO.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -114,7 +114,7 @@ public class GroupBillController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteGroupBill(@PathVariable(value="id") UUID id){
-        Optional<GroupBillModel> groupBillO = groupBillService.findById(id);
+        GroupBillModel groupBillO = groupBillService.findById(id);
         if(groupBillO.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

@@ -4,7 +4,6 @@ import com.jm.jamesapp.models.GroupBillModel;
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.repositories.GroupBillRepository;
 import com.jm.jamesapp.services.interfaces.IGroupBillService;
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,6 @@ public class GroupBillService implements IGroupBillService {
     }
 
     @Override
-    @Transactional
     public GroupBillModel save(GroupBillModel objModel) {
         return groupBillRepository.save(objModel);
     }
@@ -38,19 +36,18 @@ public class GroupBillService implements IGroupBillService {
     }
 
     @Override
-    public UserModel findById(UUID id) {
-        return groupBillRepository.findById(id);
+    public GroupBillModel findById(UUID id) {
+        return groupBillRepository.findById(id).orElse(null);
     }
 
     @Override
-    @Transactional
     public void delete(GroupBillModel objModel) {
         groupBillRepository.delete(objModel);
     }
 
 
     @Override
-    public List<GroupBillModel> findAllByOwner(UserModel userModel) {
-        return groupBillRepository.findAllByOwner(userModel);
+    public List<GroupBillModel> findAllByUser(Pageable pageable, UserModel userModel) {
+        return groupBillRepository.findAllByUser(pageable, userModel);
     }
 }

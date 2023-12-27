@@ -1,17 +1,17 @@
 package com.jm.jamesapp.services;
 
-import com.jm.jamesapp.dtos.requests.UpdateCustomerDto;
+import com.jm.jamesapp.models.dto.SaveCustomerDto;
+import com.jm.jamesapp.models.dto.UpdateCustomerDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.repositories.CustomerRepository;
 import com.jm.jamesapp.services.exceptions.BusinessException;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.utils.constraints.CpfOrCnpjValidator;
-import jakarta.transaction.Transactional;
-import org.springframework.lang.Nullable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 import static com.jm.jamesapp.utils.constraints.CpfOrCnpjValidator.cleanStringValue;
@@ -21,29 +21,31 @@ public class CustomerService implements ICustomerService {
 
     final CustomerRepository customerRepository;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    final TransactionService transactionService;
+
+    public CustomerService(CustomerRepository customerRepository, TransactionService transactionService) {
         this.customerRepository = customerRepository;
+        this.transactionService = transactionService;
     }
 
     @Override
-    @Transactional
-    public CustomerModel save(CustomerModel customerModel, UserModel userModel) {
-        customerModel.setCpfCnpj(cleanStringValue(customerModel.getCpfCnpj()));
+    public CustomerModel save(SaveCustomerDto saveCustomerDto, UserModel userModel) {
+        saveCustomerDto.setCpfCnpj(cleanStringValue(saveCustomerDto.getCpfCnpj()));
 
-        validateSave(customerModel, userModel);
+        validateSave(saveCustomerDto, userModel);
 
-        customerRepository.save(customerModel);
-        return customerModel;
+        CustomerModel customer = new CustomerModel(userModel, saveCustomerDto.getName(), saveCustomerDto.getCpfCnpj());
+
+        return customerRepository.save(customer);
     }
 
     @Override
-    @Transactional
-    public CustomerModel update(CustomerModel customer, UpdateCustomerDto saveCustomerDto, UserModel ownerUser) { // TODO: REPLICAR DTO PARA SAVE
-        validateUpdate(saveCustomerDto, ownerUser);
+    public CustomerModel update(CustomerModel customer, UpdateCustomerDto saveCustomerDto, UserModel userModel) {
+        validateUpdate(saveCustomerDto, userModel);
 
-        customer.setName(saveCustomerDto.name);
-        customer.setCpfCnpj(cleanStringValue(saveCustomerDto.cpfCnpj));
-        customer.setUpdatedBy(ownerUser.getId());
+        customer.setName(saveCustomerDto.getName());
+        customer.setCpfCnpj(cleanStringValue(saveCustomerDto.getCpfCnpj()));
+        customer.setUpdatedBy(userModel.getId());
 
         return customerRepository.save(customer);
     }
@@ -54,37 +56,37 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
-    @Transactional
     public void delete(CustomerModel customerModel) {
+        double balanceFromCustomer = transactionService.getBalanceFromCustomer(customerModel);
+        if (balanceFromCustomer > 0) throw new BusinessException("Cliente possui saldo pendente");
+        // TODO: mas se o guerreiro quiser excluir mesmo assim?
         // TODO: transactionService.calculateCustomerBalance(customerModel) ... valida se tem saldo
 
         customerRepository.delete(customerModel);
     }
 
     @Override
-    @Nullable
     public CustomerModel findByIdAndUser(UUID id, UserModel userModel) {
         return customerRepository.findByIdAndUser(id, userModel).orElse(null);
     }
 
     @Override
-    public List<CustomerModel> findAllByUser(UserModel userModel) {
-        return customerRepository.findAllByUser(userModel);
+    public Page<CustomerModel> findAllByUser(Pageable pageable, UserModel userModel) {
+        return customerRepository.findAllByUser(pageable, userModel);
     }
 
     @Override
-    @Nullable
     public CustomerModel findByCpfCnpjAndUser(String cpfCnpj, UserModel userModel) {
         return customerRepository.findByCpfCnpjAndUser(CpfOrCnpjValidator.cleanStringValue(cpfCnpj), userModel).orElse(null);
     }
 
-    private void validateSave(CustomerModel customerModel, UserModel userModel) {
+    private void validateSave(SaveCustomerDto customerModel, UserModel userModel) {
         boolean isCustomerAlreadyRegistered = findByCpfCnpjAndUser(customerModel.getCpfCnpj(), userModel) != null;
         if (isCustomerAlreadyRegistered) throw new BusinessException("Você possui um cliente cadastrado com o CPF/CNPJ informado.");
     }
 
     private void validateUpdate(UpdateCustomerDto customerDto, UserModel userModel) {
-        boolean isCustomerAlreadyRegistered = findByCpfCnpjAndUser(customerDto.cpfCnpj, userModel) != null;
+        boolean isCustomerAlreadyRegistered = findByCpfCnpjAndUser(customerDto.getCpfCnpj(), userModel) != null;
         if (isCustomerAlreadyRegistered) throw new BusinessException("Você possui um cliente cadastrado com o CPF/CNPJ informado.");
     }
 }

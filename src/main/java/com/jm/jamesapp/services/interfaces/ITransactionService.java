@@ -1,14 +1,36 @@
 package com.jm.jamesapp.services.interfaces;
 
 
-import com.jm.jamesapp.models.GroupBillModel;
+import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.TransactionModel;
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.dto.UpdateTransactionDto;
+import jakarta.annotation.Nullable;
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
+import java.util.UUID;
 
-public interface ITransactionService extends IBaseService<TransactionModel>{
+public interface ITransactionService{
 
-    List<TransactionModel> findAllByOwner(UserModel userModel);
+    Page<TransactionModel> findAllByUser(Pageable pageable, UserModel userModel);
 
+    double getBalanceFromCustomer(CustomerModel customerModel);
+
+    double getBalanceFromUser(UserModel userModel);
+
+    @Transactional
+    TransactionModel save(TransactionModel transaction);
+
+    @Transactional
+    TransactionModel update(TransactionModel transaction, UpdateTransactionDto updateTransactionDto, UserModel userModel);
+
+    Page<TransactionModel> findAll(Pageable pageable);
+
+    @Transactional
+    void delete(TransactionModel transaction);
+
+    @Nullable
+    TransactionModel findByIdAndUser(UUID id, UserModel ownerUser);
 }

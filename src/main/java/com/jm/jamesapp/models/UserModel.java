@@ -2,7 +2,6 @@ package com.jm.jamesapp.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jm.jamesapp.dtos.requests.UserRequestRecordDto;
-import com.jm.jamesapp.utils.constraints.enums.UserRole;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -56,6 +55,21 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
         this.email = data.email();
         this.password = data.password();
         this.role = data.role();
+    }
+
+    public enum UserRole {
+        ADMIN("admin"),
+        USER("user");
+
+        private String role;
+
+        UserRole(String role){
+            this.role = role;
+        }
+
+        public String getRole(){
+            return role;
+        }
     }
 
 

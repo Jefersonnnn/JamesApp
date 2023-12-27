@@ -2,7 +2,6 @@ package com.jm.jamesapp.repositories;
 
 import com.jm.jamesapp.dtos.requests.UserRequestRecordDto;
 import com.jm.jamesapp.models.UserModel;
-import com.jm.jamesapp.utils.constraints.enums.UserRole;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,7 @@ class UserRepositoryTest {
                 "James",
                 "james.test@james.com.br",
                 "super-secret-password",
-                UserRole.USER);
+                UserModel.UserRole.USER);
         UserModel newUser = this.createUser(data);
 
         var uuid = newUser.getId();

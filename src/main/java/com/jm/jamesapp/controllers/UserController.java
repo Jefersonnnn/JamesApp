@@ -4,9 +4,12 @@ package com.jm.jamesapp.controllers;
 import com.jm.jamesapp.dtos.requests.UserRequestRecordDto;
 import com.jm.jamesapp.dtos.responses.UserResponseRecordDto;
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.security.exceptions.UnauthorizedException;
+import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +17,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -60,24 +65,33 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseRecordDto> getOneUser(@PathVariable(value="id") UUID id){
-        Optional<UserModel> userO = userService.findById(id);
-        if(userO.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        UserResponseRecordDto userResponseDto = new UserResponseRecordDto(userO.get());
-        return ResponseEntity.status(HttpStatus.OK).body(userResponseDto);
+    @PreAuthorize("hasRole('ADMIN')")
+    //Todo Colocar regras para retornar o proprio usuário (não sendo admin)
+    public ResponseEntity<UserResponseRecordDto> getOneUser(@PathVariable(value="id") UUID id, Authentication authentication){
+        UserModel userModel = (UserModel) authentication.getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
+
+        // Todo: Criar condicao para retornar qualquer usuário quando for admin
+        // e apenas o mesmo usuário logado quando não for
+        UserModel userO = userService.findById(id);
+        if(userO == null) throw new ObjectNotFoundException(id, "user");
+
+        return ResponseEntity.status(HttpStatus.OK).body(new UserResponseRecordDto(userO));
 
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    //Todo Colocar regras para atualizar o proprio usuário (não sendo admin)
     public ResponseEntity<UserResponseRecordDto> updateUser(@PathVariable(value="id") UUID id,
-                                                @RequestBody @Valid UserRequestRecordDto userRequestRecordDto) {
-        Optional<UserModel> userO = userService.findById(id);
-        if(userO.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        var userModel = userO.get();
+                                                @RequestBody @Valid UserRequestRecordDto userRequestRecordDto, Authentication authentication) {
+        UserModel userModel = (UserModel) authentication.getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
+
+        UserModel userO = userService.findById(id);
+        if(userO == null) throw new ObjectNotFoundException(id, "user");
+
+        //TODO: ARRUMAR COLOCAR NO PADRAO
         BeanUtils.copyProperties(userRequestRecordDto, userModel);
 
         UserResponseRecordDto UserResponseDto = new UserResponseRecordDto(userService.update(userModel));
@@ -86,12 +100,16 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteUser(@PathVariable(value="id") UUID id){
-        Optional<UserModel> userO = userService.findById(id);
-        if(userO.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        userService.delete(userO.get());
+    @PreAuthorize("hasRole('ADMIN')")
+    //Todo Colocar regras para deletar o proprio usuário (não sendo admin)
+    public ResponseEntity<Object> deleteUser(@PathVariable(value="id") UUID id, Authentication authentication){
+        UserModel userModel = (UserModel) authentication.getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
+
+        UserModel userO = userService.findById(id);
+        if(userO == null) throw new ObjectNotFoundException(id, "user");
+
+        userService.delete(userO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

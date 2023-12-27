@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.UUID;
 
 
-public record TransactionResponseRecordDto(
+public record TransactionResponseDto(
         UUID id,
         boolean automatic,
         Date dueDate,
@@ -19,13 +19,13 @@ public record TransactionResponseRecordDto(
         TransactionModel.StatusTransaction status,
         String cancelDescription
         ) {
-        public TransactionResponseRecordDto (TransactionModel transaction) {
+        public TransactionResponseDto(TransactionModel transaction) {
                 this(
                         transaction.getId(),
                         transaction.isAutomatic(),
                         transaction.getDueDate(),
                         transaction.getTypeTransaction(),
-                        transaction.getOwner().getId(),
+                        transaction.getUser().getId(),
                         transaction.getCustomer().getId(),
                         transaction.getAmount(),
                         transaction.getDescription(),

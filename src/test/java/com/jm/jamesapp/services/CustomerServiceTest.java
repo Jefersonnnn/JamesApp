@@ -55,7 +55,7 @@ public class CustomerServiceTest {
     })
     public void testFindAllCustomers(){
         Pageable paginacao = PageRequest.of(0, 10);
-        Page<CustomerModel> customerModelList = customerService.findAll(paginacao);
+        Page<CustomerModel> customerModelList = customerService.findAllByUser(paginacao, new UserModel());
 
         assertNotNull(customerModelList);
         assertEquals(customerModelList.getTotalElements(), 5);

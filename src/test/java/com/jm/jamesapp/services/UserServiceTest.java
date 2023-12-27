@@ -15,15 +15,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlGroup;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -41,7 +38,7 @@ public class UserServiceTest {
 
     @BeforeEach
     public void setUp() {
-        user = new UserModel("Felipe Adriano", "felipe.adriano@jamesapp.com.br", "lipe@54321", UserRole.ADMIN);
+        user = new UserModel("Felipe Adriano", "felipe.adriano@jamesapp.com.br", "lipe@54321", UserModel.UserRole.ADMIN);
         user.setId(UUID.fromString("1c1bfebd-52e3-4d47-8527-bea182851407"));
     }
 
@@ -61,9 +58,9 @@ public class UserServiceTest {
     public void testFindAllUsers(){
         Pageable paginacao = PageRequest.of(0, 10);
         List<UserModel> userModels = new ArrayList<>();
-        userModels.add(new UserModel("Felipe Adriano", "felipe.adriano@jamesapp.com.br", "lipe@54321", UserRole.USER));
-        userModels.add(new UserModel("Zezin Rei Delas", "zezin.reidelas@jamesapp.com.br", "zezin@54321", UserRole.USER));
-        userModels.add(new UserModel("James App", "james.app@jamesapp.com.br", "james@5432", UserRole.ADMIN));
+        userModels.add(new UserModel("Felipe Adriano", "felipe.adriano@jamesapp.com.br", "lipe@54321", UserModel.UserRole.USER));
+        userModels.add(new UserModel("Zezin Rei Delas", "zezin.reidelas@jamesapp.com.br", "zezin@54321", UserModel.UserRole.USER));
+        userModels.add(new UserModel("James App", "james.app@jamesapp.com.br", "james@5432", UserModel.UserRole.ADMIN));
 
         Page<UserModel> page = new PageImpl<>(userModels, paginacao, userModels.size());
 
@@ -81,10 +78,10 @@ public class UserServiceTest {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         var uuid = UUID.fromString("1c1bfebd-52e3-4d47-8527-bea182851407");
-        Optional<UserModel> user = userService.findById(uuid);
+        UserModel user = userService.findById(uuid);
 
-        assert user.isPresent();
-        assertEquals(uuid,user.get().getId());
+        assert user != null;
+        assertEquals(uuid,user.getId());
         verify(userRepository).findById(uuid);
         verifyNoMoreInteractions(userRepository);
     }
@@ -94,9 +91,9 @@ public class UserServiceTest {
     public void testFindUserByIdEmpty() {
         when(userRepository.findById(null)).thenReturn(Optional.empty());
 
-        Optional<UserModel> user = userService.findById(null);
+       UserModel user = userService.findById(null);
 
-        assertFalse(user.isPresent());
+        assertNotNull(user);
         verifyNoInteractions(userRepository);
     }
 

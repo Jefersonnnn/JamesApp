@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 
-public record TransactionRequestRecordDto(
+public record ApiTransactionRequestDto(
         Date dueDate,
         String description,
         @NotNull String customerCpfCnpj,

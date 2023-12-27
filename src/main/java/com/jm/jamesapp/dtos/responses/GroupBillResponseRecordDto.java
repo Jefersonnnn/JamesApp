@@ -17,7 +17,7 @@ public record GroupBillResponseRecordDto(
 ) {
     public GroupBillResponseRecordDto(GroupBillModel groupBillModel) {
         this(groupBillModel.getId(),
-                groupBillModel.getOwner().getId(),
+                groupBillModel.getUser().getId(),
                 groupBillModel.getName(),
                 groupBillModel.getTotalPayment(),
                 groupBillModel.getDueDateDay(),

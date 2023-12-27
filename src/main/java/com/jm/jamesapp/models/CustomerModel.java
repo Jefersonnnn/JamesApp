@@ -42,10 +42,6 @@ public class CustomerModel extends BaseModel implements Serializable {
         return groupBills;
     }
 
-    public void setGroupBills(Set<GroupBillModel> groupBills) {
-        this.groupBills = groupBills;
-    }
-
     public String getName() {
         return name;
     }

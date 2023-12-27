@@ -20,7 +20,7 @@ public class GroupBillModel extends BaseModel implements Serializable {
     private String name;
 
     @ManyToOne
-    private UserModel owner;
+    private UserModel user;
 
     @Column(nullable = false)
     private BigDecimal totalPayment;
@@ -40,7 +40,6 @@ public class GroupBillModel extends BaseModel implements Serializable {
 
     public enum BillingFrequency {
         DAILY("Daily"),
-        WEEKLY("Weekly"),
         MONTHLY("Monthly"),
         ANNUALLY("Annually");
 
@@ -60,10 +59,6 @@ public class GroupBillModel extends BaseModel implements Serializable {
         return customers;
     }
 
-    public void setCustomers(Set<CustomerModel> customers) {
-        this.customers = customers;
-    }
-
     public String getName() {
         return name;
     }
@@ -72,12 +67,12 @@ public class GroupBillModel extends BaseModel implements Serializable {
         this.name = name;
     }
 
-    public UserModel getOwner() {
-        return owner;
+    public UserModel getUser() {
+        return user;
     }
 
-    public void setOwner(UserModel owner) {
-        this.owner = owner;
+    public void setUser(UserModel user) {
+        this.user = user;
     }
 
     public BigDecimal getTotalPayment() {
