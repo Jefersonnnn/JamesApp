@@ -26,6 +26,7 @@ public class UserService implements IUserService {
     public UserModel save(SaveUserDto saveUserDto) {
         UserModel user = new UserModel();
 
+        user.setName(saveUserDto.getName());
         user.setUsername(saveUserDto.getUsername());
         user.setEmail(saveUserDto.getEmail());
 

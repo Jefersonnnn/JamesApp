@@ -20,6 +20,8 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     private static final long serialVersionUID = 1L;
 
     @Column(nullable = false)
+    private String name;
+    @Column(nullable = false)
     private String username;
     @Column(unique = true, nullable = false)
     private String email;
@@ -33,25 +35,22 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     @OneToMany(mappedBy = "user")
     private List<GroupBillModel> groupBills;
 
-    //Todo: Adicionar a lista de Transações e talvez adicionar um método para retornar o saldo ou recalcular o saldo
-    // com base nas transações feitas (indexação?)?
-
     @Enumerated(value = EnumType.STRING) //TODO: Definir para todo Enum ter essa annotation por default no sistema
     private UserRole role;
 
-    public UserModel(){
+    public UserModel(){}
 
-    }
-
-    public UserModel(String username, String email, String password, UserRole role) {
-        this.username = username;
+    public UserModel(String name, String username, String email, String password, UserRole role) {
+        this.name = name;
+        setUsername(this.username = username);
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
     public UserModel(ApiUserRequestDto data) {
-        this.username = data.username();
+        this.name = data.name();
+        setUsername(data.username());
         this.email = data.email();
         this.password = data.password();
         this.role = data.role();
@@ -81,7 +80,17 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
         return groupBills;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public void setUsername(String username) {
+        username = username.replace(" ", "_");
+        username = username.toLowerCase();
         this.username = username;
     }
     @Override

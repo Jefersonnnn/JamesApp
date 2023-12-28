@@ -52,10 +52,10 @@ public class DevConfig implements CommandLineRunner {
         customerRepository.deleteAll();
         userRepository.deleteAll();
 
-        ApiUserRequestDto u1 = new ApiUserRequestDto("Jeferson Machado", "jeferson.machado@jamesapp.com.br", "12345678", UserModel.UserRole.ADMIN);
-        ApiUserRequestDto u2 = new ApiUserRequestDto("Douglas Giovanellas", "doug.giova.nellas@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
-        ApiUserRequestDto u3 = new ApiUserRequestDto("Felipe Prestes", "felipe.prestes@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
-        ApiUserRequestDto u4 = new ApiUserRequestDto("José Raul", "jose.raqul.quadross@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
+        ApiUserRequestDto u1 = new ApiUserRequestDto("Jeferson Machado", "jefersonm", "jeferson.machado@jamesapp.com.br", "12345678", UserModel.UserRole.ADMIN);
+        ApiUserRequestDto u2 = new ApiUserRequestDto("Douglas Giovanellas", "giova nellas", "doug.giova.nellas@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
+        ApiUserRequestDto u3 = new ApiUserRequestDto("Felipe Prestes", "Felipe Prestes", "felipe.prestes@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
+        ApiUserRequestDto u4 = new ApiUserRequestDto("José Raul", "rei delas", "jose.raqul.quadross@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
 
         UserModel user1 = userService.save(new SaveUserDto(u1));
         UserModel user2 = userService.save(new SaveUserDto(u2));

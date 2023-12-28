@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class SaveUserDto {
+    private String name;
     private String username;
     private String email;
     private String password;
@@ -17,10 +18,19 @@ public class SaveUserDto {
     public SaveUserDto(){}
 
     public SaveUserDto(ApiUserRequestDto requestDto) {
+        this.name = requestDto.name();
         this.username = requestDto.username();
         this.email = requestDto.email();
         this.password = requestDto.password();
         this.role = requestDto.role();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getUsername() {

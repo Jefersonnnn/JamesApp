@@ -1,6 +1,5 @@
 package com.jm.jamesapp.services;
 
-import com.jm.jamesapp.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
