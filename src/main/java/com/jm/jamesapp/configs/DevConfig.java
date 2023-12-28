@@ -2,11 +2,13 @@ package com.jm.jamesapp.configs;
 
 import com.jm.jamesapp.dtos.requests.ApiCustomerRequestDto;
 import com.jm.jamesapp.dtos.requests.ApiGroupBillRequestDto;
+import com.jm.jamesapp.dtos.requests.ApiUserRequestDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.GroupBillModel;
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.models.dto.SaveCustomerDto;
 import com.jm.jamesapp.models.dto.SaveGroupBillDto;
+import com.jm.jamesapp.models.dto.SaveUserDto;
 import com.jm.jamesapp.models.dto.UpdateCustomerDto;
 import com.jm.jamesapp.repositories.CustomerRepository;
 import com.jm.jamesapp.repositories.GroupBillRepository;
@@ -29,6 +31,9 @@ public class DevConfig implements CommandLineRunner {
     private UserRepository userRepository;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private CustomerRepository customerRepository;
 
     @Autowired
@@ -47,12 +52,15 @@ public class DevConfig implements CommandLineRunner {
         customerRepository.deleteAll();
         userRepository.deleteAll();
 
-        UserModel userAdm = new UserModel("Jeferson Machado", "jeferson.machado@jamesapp.com.br", "12345678", UserModel.UserRole.ADMIN);
-        UserModel user1 = new UserModel("Douglas Giovanellas", "doug.giova.nellas@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
-        UserModel user2 = new UserModel("Felipe Prestes", "felipe.prestes@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
-        UserModel user3 = new UserModel("José Raul", "jose.raqul.quadross@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
+        ApiUserRequestDto u1 = new ApiUserRequestDto("Jeferson Machado", "jeferson.machado@jamesapp.com.br", "12345678", UserModel.UserRole.ADMIN);
+        ApiUserRequestDto u2 = new ApiUserRequestDto("Douglas Giovanellas", "doug.giova.nellas@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
+        ApiUserRequestDto u3 = new ApiUserRequestDto("Felipe Prestes", "felipe.prestes@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
+        ApiUserRequestDto u4 = new ApiUserRequestDto("José Raul", "jose.raqul.quadross@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
 
-        userRepository.saveAll(Arrays.asList(userAdm, user1, user2, user3));
+        UserModel user1 = userService.save(new SaveUserDto(u1));
+        UserModel user2 = userService.save(new SaveUserDto(u2));
+        UserModel user3 = userService.save(new SaveUserDto(u3));
+        userService.save(new SaveUserDto(u4));
 
         ApiCustomerRequestDto customer1 = new ApiCustomerRequestDto("Jeferson Machado", "09256144913");
         ApiCustomerRequestDto customer2 = new ApiCustomerRequestDto("Felipe Prestes", "10739970062");

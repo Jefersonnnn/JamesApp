@@ -30,17 +30,19 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = this.recoverToken(request);
-        if(token != null) {
-            String userId = tokenService.validateToken(token);
-//            if (userId == null || userId.isEmpty()) throw new UnauthorizedException();
-            UserModel user = userService.findById(UUID.fromString(userId));
-//            if (user == null) throw new UnauthorizedException(); //TODO: Testar
-
-            var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+            String token = this.recoverToken(request);
+            if(token != null) {
+                String userId = tokenService.validateToken(token);
+                UserModel user = userService.findById(UUID.fromString(userId));
+                var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        } catch (Exception e){
+            throw new UnauthorizedException();
+        } finally {
+            filterChain.doFilter(request, response);
         }
-        filterChain.doFilter(request, response);
     }
 
     private String recoverToken(HttpServletRequest request){
