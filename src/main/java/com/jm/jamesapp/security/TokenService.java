@@ -32,7 +32,6 @@ public class TokenService {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.create()
                     .withIssuer(issuer)
-                    .withKeyId(user.getId().toString())
                     .withSubject(user.getUsername())
                     .withExpiresAt(genExpirationDate())
                     .sign(algorithm);
@@ -48,7 +47,7 @@ public class TokenService {
                     .withIssuer(issuer)
                     .build()
                     .verify(token)
-                    .getKeyId();
+                    .getSubject();
         } catch (JWTVerificationException exception) {
             return "";
         }

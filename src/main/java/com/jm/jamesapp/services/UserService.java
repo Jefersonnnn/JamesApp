@@ -54,9 +54,7 @@ public class UserService implements IUserService {
 
     public UserModel findById(UUID id) {
         if (id == null) return null;
-
-        Optional<UserModel> user = userRepository.findById(id);
-        return user.orElse(null);
+        return userRepository.findById(id).orElse(null);
     }
 
     @Override
