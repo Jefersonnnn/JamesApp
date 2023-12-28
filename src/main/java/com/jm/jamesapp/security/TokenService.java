@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.UUID;
 
 @Service
 public class TokenService {
@@ -33,6 +34,7 @@ public class TokenService {
             return JWT.create()
                     .withIssuer(issuer)
                     .withSubject(user.getUsername())
+                    .withKeyId(String.valueOf(user.getId()))
                     .withExpiresAt(genExpirationDate())
                     .sign(algorithm);
         } catch (JWTCreationException exception) {
@@ -40,16 +42,17 @@ public class TokenService {
         }
     }
 
-    public String validateToken(String token){
+    public UUID validateToken(String token){
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            return JWT.require(algorithm)
+            UUID id = UUID.fromString(JWT.require(algorithm)
                     .withIssuer(issuer)
                     .build()
                     .verify(token)
-                    .getSubject();
+                    .getKeyId());
+            return id;
         } catch (JWTVerificationException exception) {
-            return "";
+            return UUID.randomUUID();
         }
     }
 

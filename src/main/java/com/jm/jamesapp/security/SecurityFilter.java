@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
@@ -31,8 +32,8 @@ public class SecurityFilter extends OncePerRequestFilter {
         try {
             String token = this.recoverToken(request);
             if (token != null) {
-                String userName = tokenService.validateToken(token);
-                UserDetails user = userService.findByUsername(userName);
+                UUID uuid = tokenService.validateToken(token);
+                UserDetails user = userService.findById(uuid);
                 var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
