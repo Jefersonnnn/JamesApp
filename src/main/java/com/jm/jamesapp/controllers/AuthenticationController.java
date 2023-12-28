@@ -49,7 +49,6 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDto> register(@RequestBody @Valid ApiUserRequestDto apiUserRequestDto){
 
         if(this.userService.findByUsername(apiUserRequestDto.username()) != null) throw new DataIntegrityViolationException("Username already exists");
