@@ -33,7 +33,6 @@ public class TransactionController {
 
     final ICustomerService customerService;
     final IUserService userService;
-
     final ITransactionService transactionService;
 
     public TransactionController(ICustomerService customerService, IUserService userService, ITransactionService transactionService) {
@@ -41,7 +40,6 @@ public class TransactionController {
         this.userService = userService;
         this.transactionService = transactionService;
     }
-
 
     @PostMapping
     public ResponseEntity<TransactionResponseDto> registerTransaction(@RequestBody @Valid ApiTransactionRequestDto apiTransactionRequestDto,

@@ -11,15 +11,12 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ITransactionService {
 
     Page<TransactionModel> findAllByUser(Pageable pageable, UserModel userModel);
-
-    double getBalanceFromCustomer(CustomerModel customerModel);
-
-    double getBalanceFromUser(UserModel userModel);
 
     @Transactional
     TransactionModel save(SaveTransactionDto saveTransactionDto, UserModel userModel);
@@ -28,6 +25,10 @@ public interface ITransactionService {
     TransactionModel update(TransactionModel transaction, UpdateTransactionDto updateTransactionDto, UserModel userModel);
 
     Page<TransactionModel> findAll(Pageable pageable);
+
+    Page<TransactionModel> findAllByCustomer(Pageable pageable, CustomerModel customerModel);
+
+    List<TransactionModel> findAllByCustomer(CustomerModel customerModel);
 
     @Transactional
     void delete(TransactionModel transactionModel);

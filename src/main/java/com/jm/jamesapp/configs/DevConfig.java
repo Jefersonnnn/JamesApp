@@ -2,19 +2,19 @@ package com.jm.jamesapp.configs;
 
 import com.jm.jamesapp.dtos.requests.ApiCustomerRequestDto;
 import com.jm.jamesapp.dtos.requests.ApiGroupBillRequestDto;
+import com.jm.jamesapp.dtos.requests.ApiTransactionRequestDto;
 import com.jm.jamesapp.dtos.requests.ApiUserRequestDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.GroupBillModel;
 import com.jm.jamesapp.models.UserModel;
-import com.jm.jamesapp.models.dto.SaveCustomerDto;
-import com.jm.jamesapp.models.dto.SaveGroupBillDto;
-import com.jm.jamesapp.models.dto.SaveUserDto;
-import com.jm.jamesapp.models.dto.UpdateCustomerDto;
+import com.jm.jamesapp.models.dto.*;
 import com.jm.jamesapp.repositories.CustomerRepository;
 import com.jm.jamesapp.repositories.GroupBillRepository;
+import com.jm.jamesapp.repositories.TransactionRepository;
 import com.jm.jamesapp.repositories.UserRepository;
 import com.jm.jamesapp.services.CustomerService;
 import com.jm.jamesapp.services.GroupBillService;
+import com.jm.jamesapp.services.TransactionService;
 import com.jm.jamesapp.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -22,7 +22,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.Date;
 
 @Configuration
 @Profile("dev")
@@ -45,9 +47,16 @@ public class DevConfig implements CommandLineRunner {
     @Autowired
     private GroupBillService groupBillService;
 
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private TransactionService transactionService;
+
     @Override
     public void run(String... args) throws Exception {
 
+        transactionRepository.deleteAll();
         groupBillRepository.deleteAll();
         customerRepository.deleteAll();
         userRepository.deleteAll();
@@ -73,6 +82,40 @@ public class DevConfig implements CommandLineRunner {
         customerService.save(new SaveCustomerDto(customer4), user3);
 
         ApiGroupBillRequestDto group1 = new ApiGroupBillRequestDto("Suno Research", BigDecimal.valueOf(130.0), GroupBillModel.BillingFrequency.MONTHLY, "Grupo suno de apostas esportivas");
-        groupBillService.save(new SaveGroupBillDto(group1), user1);
+        groupBillService.save(new SaveGroupBillDto(group1), user2);
+
+        ApiTransactionRequestDto tran1 = new ApiTransactionRequestDto(Date.from(Instant.now()), "Pagamento aleatório", "09256144913", BigDecimal.valueOf(25));
+        ApiTransactionRequestDto tran2 = new ApiTransactionRequestDto(Date.from(Instant.now()), "Pagamento aleatório", "09256144913", BigDecimal.valueOf(100));
+        ApiTransactionRequestDto tran3 = new ApiTransactionRequestDto(Date.from(Instant.now()), "Pagamento aleatório", "09256144913", BigDecimal.valueOf(33));
+
+        transactionService.save(new SaveTransactionDto(tran1), user2);
+        transactionService.save(new SaveTransactionDto(tran2), user2);
+        transactionService.save(new SaveTransactionDto(tran3), user2);
+
+        SaveTransactionDto debitGroup = new SaveTransactionDto();
+        debitGroup.setAmount(BigDecimal.valueOf(-25));
+        debitGroup.setDescription("Pagamento do grupo Suno bolado");
+        debitGroup.setDueDate(Date.from(Instant.now()));
+        debitGroup.setCustomerCpfCnpj("09256144913");
+
+        transactionService.save(debitGroup, user2);
+
+        SaveTransactionDto debitGroup2 = new SaveTransactionDto();
+        debitGroup2.setAmount(BigDecimal.valueOf(-133));
+        debitGroup2.setDescription("Pagamento do grupo Suno bolado");
+        debitGroup2.setDueDate(Date.from(Instant.now()));
+        debitGroup2.setCustomerCpfCnpj("09256144913");
+
+        transactionService.save(debitGroup2, user2);
+
+        // Erro
+        SaveTransactionDto debitGroup3 = new SaveTransactionDto();
+        debitGroup3.setAmount(BigDecimal.valueOf(-5));
+        debitGroup3.setDescription("Pagamento do grupo Suno bolado");
+        debitGroup3.setDueDate(Date.from(Instant.now()));
+        debitGroup3.setCustomerCpfCnpj("09256144913");
+
+        transactionService.save(debitGroup3, user2);
+
     }
 }

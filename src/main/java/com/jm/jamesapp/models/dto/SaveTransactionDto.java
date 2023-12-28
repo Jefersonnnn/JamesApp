@@ -11,6 +11,8 @@ public class SaveTransactionDto {
     private String customerCpfCnpj;
     private BigDecimal amount;
 
+    public SaveTransactionDto(){}
+
     public SaveTransactionDto(ApiTransactionRequestDto requestDto) {
         this.dueDate = requestDto.dueDate();
         this.description = requestDto.description();

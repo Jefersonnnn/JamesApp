@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -47,7 +49,12 @@ public class TransactionService implements ITransactionService {
         transaction.setAutomatic(false);
         transaction.setDescription(saveTransactionDto.getDescription());
 
-        transaction.setTypeTransaction(TransactionModel.TypeTransaction.PAYMENT_RECEIVED);
+        if (saveTransactionDto.getAmount().compareTo(BigDecimal.ZERO) < 0){
+            transaction.setTypeTransaction(TransactionModel.TypeTransaction.PAID_GROUPBILL);
+        } else {
+            transaction.setTypeTransaction(TransactionModel.TypeTransaction.PAYMENT_RECEIVED);
+        }
+
         transaction.setStatus(TransactionModel.StatusTransaction.COMPLETED);
 
 
@@ -56,6 +63,8 @@ public class TransactionService implements ITransactionService {
 
     @Override
     public TransactionModel update(TransactionModel transaction, UpdateTransactionDto updateTransactionDto, UserModel userModel) {
+        // todo: Faz sentido alterar uma transação?
+        // Não poderia quebrar todas as posteriores caso pegar uma antiga.
         validateUpdateTransaction(updateTransactionDto, userModel);
         return transactionRepository.save(transaction);
     }
@@ -63,6 +72,16 @@ public class TransactionService implements ITransactionService {
     @Override
     public Page<TransactionModel> findAll(Pageable pageable) {
         return transactionRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<TransactionModel> findAllByCustomer(Pageable pageable, CustomerModel customerModel) {
+        return transactionRepository.findAllByCustomer(pageable, customerModel);
+    }
+
+    @Override
+    public List<TransactionModel> findAllByCustomer(CustomerModel customerModel) {
+        return transactionRepository.findAllByCustomer(customerModel);
     }
 
     @Override
@@ -82,25 +101,36 @@ public class TransactionService implements ITransactionService {
         transactionRepository.save(transactionModel);
     }
 
-    @Override
-    public double getBalanceFromCustomer(CustomerModel customerModel){
-        //TODO FAZER
-        return 0.0;
-    }
-
-    @Override
-    public double getBalanceFromUser(UserModel userModel) {
-        //TODO: Fazer
-        return 0;
-    }
-
     private void validateSaveTransaction(SaveTransactionDto saveTransactionDto, UserModel userModel) {
-        boolean isTransactionAlreadyRegistered = customerService.findByCpfCnpjAndUser(saveTransactionDto.getCustomerCpfCnpj(), userModel) != null;
-        if (isTransactionAlreadyRegistered) throw new BusinessException("Você não possui um cliente cadastrado com o CPF/CNPJ informado.");
+        validateAmountTransaction(saveTransactionDto.getAmount());
+
+        CustomerModel customer = customerService.findByCpfCnpjAndUser(saveTransactionDto.getCustomerCpfCnpj(), userModel);
+        if (customer == null) throw new BusinessException("Você não possui um cliente cadastrado com o CPF/CNPJ informado.");
+
+        validateDebitTransaction(saveTransactionDto.getAmount(), customer.getId(), userModel);
     }
 
     private void validateUpdateTransaction(UpdateTransactionDto updateTransactionDto, UserModel userModel){
-        boolean isTransactionAlreadyRegistered = customerService.findByCpfCnpjAndUser(updateTransactionDto.getCustomerCpfCnpj(), userModel) != null;
-        if (isTransactionAlreadyRegistered) throw new BusinessException("Você não possui um cliente cadastrado com o CPF/CNPJ informado.");
+        validateAmountTransaction(updateTransactionDto.getAmount());
+        CustomerModel customer = customerService.findByCpfCnpjAndUser(updateTransactionDto.getCustomerCpfCnpj(), userModel);
+        if (customer == null) throw new BusinessException("Você não possui um cliente cadastrado com o CPF/CNPJ informado.");
+
+        validateDebitTransaction(updateTransactionDto.getAmount(), customer.getId(), userModel);
+    }
+
+    private void validateDebitTransaction(BigDecimal transactionAmount, UUID customerId, UserModel userModel){
+        if(transactionAmount.compareTo(BigDecimal.ZERO) < 0){
+            transactionAmount = transactionAmount.abs();
+            BigDecimal balance = customerService.calculateBalance(customerId, userModel);
+            if(balance.compareTo(transactionAmount) < 0){
+                throw new BusinessException("Saldo insuficiente para realizar a transação de débito.");
+            }
+        }
+    }
+
+    private void validateAmountTransaction(BigDecimal transactionAmount){
+        if(transactionAmount.compareTo(BigDecimal.ZERO) == 0){
+            throw new BusinessException("O valor da transação deve ser diferente de zero.");
+        }
     }
 }
