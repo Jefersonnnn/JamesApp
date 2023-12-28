@@ -4,12 +4,12 @@ import com.jm.jamesapp.models.UserModel;
 
 import java.util.UUID;
 
-public record UserResponseRecordDto(
+public record UserResponseDto(
         UUID id,
         String username,
         String email) {
 
-    public UserResponseRecordDto (UserModel userModel) {
+    public UserResponseDto(UserModel userModel) {
         this(userModel.getId(), userModel.getUsername(), userModel.getEmail());
     }
 }

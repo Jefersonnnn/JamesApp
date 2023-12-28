@@ -1,7 +1,7 @@
 package com.jm.jamesapp.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jm.jamesapp.dtos.requests.UserRequestRecordDto;
+import com.jm.jamesapp.dtos.requests.ApiUserRequestDto;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -50,7 +50,7 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
         this.role = role;
     }
 
-    public UserModel(UserRequestRecordDto data) {
+    public UserModel(ApiUserRequestDto data) {
         this.username = data.username();
         this.email = data.email();
         this.password = data.password();
@@ -77,16 +77,8 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
         return customers;
     }
 
-    public void setCustomers(List<CustomerModel> customers) {
-        this.customers = customers;
-    }
-
     public List<GroupBillModel> getGroupBills() {
         return groupBills;
-    }
-
-    public void setGroupBills(List<GroupBillModel> groupBills) {
-        this.groupBills = groupBills;
     }
 
     public void setUsername(String username) {

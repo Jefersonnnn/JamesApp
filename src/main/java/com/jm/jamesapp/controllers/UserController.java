@@ -1,15 +1,16 @@
 package com.jm.jamesapp.controllers;
 
 
-import com.jm.jamesapp.dtos.requests.UserRequestRecordDto;
-import com.jm.jamesapp.dtos.responses.UserResponseRecordDto;
+import com.jm.jamesapp.dtos.requests.ApiUserRequestDto;
+import com.jm.jamesapp.dtos.responses.UserResponseDto;
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.dto.SaveUserDto;
 import com.jm.jamesapp.security.exceptions.UnauthorizedException;
 import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Role;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -37,37 +37,36 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseRecordDto> saveUser(@RequestBody @Valid UserRequestRecordDto userRequestRecordDto) {
-        var userModel = new UserModel();
-        BeanUtils.copyProperties(userRequestRecordDto, userModel);
-        // UserVO para enviar para o service
-        // Service Retornar o UserModel (BD)
-        UserResponseRecordDto userResponseRecordDto = new UserResponseRecordDto(userService.save(userModel));
-        return ResponseEntity.status(HttpStatus.CREATED).body(userResponseRecordDto);
+    public ResponseEntity<UserResponseDto> saveUser(@RequestBody @Valid ApiUserRequestDto apiUserRequestDto) {
+        if(this.userService.findByUsername(apiUserRequestDto.username()) != null) throw new DataIntegrityViolationException("User already exists");
+        if(this.userService.findByEmail(apiUserRequestDto.email()) != null) throw new DataIntegrityViolationException("User already exists");
+
+        var userSaved = userService.save(new SaveUserDto(apiUserRequestDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new UserResponseDto(userSaved));
     }
 
     @GetMapping
-    public ResponseEntity<Page<UserResponseRecordDto>> getAllUsers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+    public ResponseEntity<Page<UserResponseDto>> getAllUsers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
         var userList = userService.findAll(pageable);
 
         if(userList.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        var responseList = new ArrayList<UserResponseRecordDto>();
+        var responseList = new ArrayList<UserResponseDto>();
 
         for (var user: userList) {
-            responseList.add(new UserResponseRecordDto(user));
+            responseList.add(new UserResponseDto(user));
         }
 
-        Page<UserResponseRecordDto> pageResponse = new PageImpl<>(responseList, pageable, responseList.size());
+        Page<UserResponseDto> pageResponse = new PageImpl<>(responseList, pageable, responseList.size());
         return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     //Todo Colocar regras para retornar o proprio usuário (não sendo admin)
-    public ResponseEntity<UserResponseRecordDto> getOneUser(@PathVariable(value="id") UUID id, Authentication authentication){
+    public ResponseEntity<UserResponseDto> getOneUser(@PathVariable(value="id") UUID id, Authentication authentication){
         UserModel userModel = (UserModel) authentication.getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
@@ -76,15 +75,15 @@ public class UserController {
         UserModel userO = userService.findById(id);
         if(userO == null) throw new ObjectNotFoundException(id, "user");
 
-        return ResponseEntity.status(HttpStatus.OK).body(new UserResponseRecordDto(userO));
+        return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(userO));
 
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     //Todo Colocar regras para atualizar o proprio usuário (não sendo admin)
-    public ResponseEntity<UserResponseRecordDto> updateUser(@PathVariable(value="id") UUID id,
-                                                @RequestBody @Valid UserRequestRecordDto userRequestRecordDto, Authentication authentication) {
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable(value="id") UUID id,
+                                                      @RequestBody @Valid ApiUserRequestDto userRequestRecordDto, Authentication authentication) {
         UserModel userModel = (UserModel) authentication.getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
@@ -94,7 +93,7 @@ public class UserController {
         //TODO: ARRUMAR COLOCAR NO PADRAO
         BeanUtils.copyProperties(userRequestRecordDto, userModel);
 
-        UserResponseRecordDto UserResponseDto = new UserResponseRecordDto(userService.update(userModel));
+        UserResponseDto UserResponseDto = new UserResponseDto(userService.update(userModel));
 
         return ResponseEntity.status(HttpStatus.OK).body(UserResponseDto);
     }

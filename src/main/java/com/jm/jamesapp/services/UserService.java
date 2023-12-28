@@ -1,11 +1,13 @@
 package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.dto.SaveUserDto;
 import com.jm.jamesapp.repositories.UserRepository;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -21,11 +23,22 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserModel save(UserModel objModel) {
-        if (objModel.getRole() == null){
-            objModel.setRole(UserModel.UserRole.USER);
+    public UserModel save(SaveUserDto saveUserDto) {
+        UserModel user = new UserModel();
+
+        user.setUsername(saveUserDto.getUsername());
+        user.setEmail(saveUserDto.getEmail());
+
+        String encryptedPassword = new BCryptPasswordEncoder().encode(saveUserDto.getPassword());
+        user.setPassword(encryptedPassword);
+
+        if (saveUserDto.getRole() == null){
+            user.setRole(UserModel.UserRole.USER);
+        } else {
+            user.setRole(saveUserDto.getRole());
         }
-        return userRepository.save(objModel);
+
+        return userRepository.save(user);
     }
 
     @Override
@@ -52,6 +65,11 @@ public class UserService implements IUserService {
 
     @Override
     public UserDetails findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsername(username).orElse(null);
+    }
+
+    @Override
+    public UserDetails findByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
     }
 }

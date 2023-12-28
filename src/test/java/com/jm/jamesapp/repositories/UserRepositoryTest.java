@@ -1,6 +1,6 @@
 package com.jm.jamesapp.repositories;
 
-import com.jm.jamesapp.dtos.requests.UserRequestRecordDto;
+import com.jm.jamesapp.dtos.requests.ApiUserRequestDto;
 import com.jm.jamesapp.models.UserModel;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +27,7 @@ class UserRepositoryTest {
     @Test
     @DisplayName("Should get User successfully from DB")
     void findByIdSuccess(){
-        UserRequestRecordDto data = new UserRequestRecordDto(
+        ApiUserRequestDto data = new ApiUserRequestDto(
                 "James",
                 "james.test@james.com.br",
                 "super-secret-password",
@@ -53,7 +53,7 @@ class UserRepositoryTest {
         assertThat(result.isEmpty()).isTrue();
     }
 
-    private UserModel createUser(UserRequestRecordDto data){
+    private UserModel createUser(ApiUserRequestDto data){
         UserModel newUser = new UserModel(data);
         this.entityManager.persist(newUser);
         return newUser;
