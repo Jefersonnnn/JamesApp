@@ -6,12 +6,14 @@ import com.jm.jamesapp.models.dto.UpdateCustomerDto;
 import com.jm.jamesapp.dtos.responses.CustomerResponseDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.security.IAuthenticationFacade;
 import com.jm.jamesapp.security.exceptions.UnauthorizedException;
 import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -52,16 +54,14 @@ public class CustomerController {
 
     @GetMapping
     public ResponseEntity<Page<CustomerResponseDto>> getAll(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Authentication authentication){
-
-        // TODO: Analisar como deixar esse authentication global para não precisar receber em cada action
         UserModel userModel = (UserModel) authentication.getPrincipal();
+
         if (userModel == null) throw new UnauthorizedException();
 
         Page<CustomerModel> customersList = customerService.findAllByUser(pageable, userModel);
 
         Page<CustomerResponseDto> pageResponse = customersList.map(CustomerResponseDto::new);
 
-//      Page<CustomerResponseDto> pageResponse = new PageImpl<>(responseList, pageable, responseList.size());
         return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
     }
 

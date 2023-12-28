@@ -31,8 +31,11 @@ public class SecurityConfigurations {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register").hasRole("ADMIN") //Todo: Bloquear depois
+                        .requestMatchers(HttpMethod.POST, "/auth/register").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users/byEmail").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users/me").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

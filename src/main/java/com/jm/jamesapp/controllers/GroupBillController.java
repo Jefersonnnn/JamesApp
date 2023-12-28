@@ -40,7 +40,7 @@ public class GroupBillController {
     }
 
     @PostMapping
-    public ResponseEntity<GroupBillResponseDto> saveGroupBill(@RequestBody @Valid ApiGroupBillRequestDto apiGroupBillRequestDto, Authentication authentication) {
+    public ResponseEntity<GroupBillResponseDto> save(@RequestBody @Valid ApiGroupBillRequestDto apiGroupBillRequestDto, Authentication authentication) {
         UserModel userModel = (UserModel) authentication.getPrincipal();
 
         if (userModel == null) throw new UnauthorizedException();
@@ -51,7 +51,7 @@ public class GroupBillController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<GroupBillResponseDto>> getAllGroupBills(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Authentication authentication) {
+    public ResponseEntity<Page<GroupBillResponseDto>> getAll(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Authentication authentication) {
         UserModel userModel = (UserModel) authentication.getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
@@ -64,7 +64,7 @@ public class GroupBillController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GroupBillResponseDto> getOneGroupBill(@PathVariable(value = "id") UUID id, Authentication authentication) {
+    public ResponseEntity<GroupBillResponseDto> getOne(@PathVariable(value = "id") UUID id, Authentication authentication) {
         UserModel userModel = (UserModel) authentication.getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
@@ -75,7 +75,7 @@ public class GroupBillController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GroupBillResponseDto> updateGroupBill(@PathVariable(value = "id") UUID id,
+    public ResponseEntity<GroupBillResponseDto> update(@PathVariable(value = "id") UUID id,
                                                                 @RequestBody @Valid ApiGroupBillRequestDto apiGroupBillRequestDto,
                                                                 Authentication authentication) {
         UserModel userModel = (UserModel) authentication.getPrincipal();
@@ -106,7 +106,7 @@ public class GroupBillController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteGroupBill(@PathVariable(value = "id") UUID id, Authentication authentication) {
+    public ResponseEntity<Object> delete(@PathVariable(value = "id") UUID id, Authentication authentication) {
         UserModel userModel = (UserModel) authentication.getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 

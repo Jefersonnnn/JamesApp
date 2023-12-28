@@ -7,25 +7,21 @@ import com.jm.jamesapp.dtos.responses.UserResponseDto;
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.models.dto.SaveUserDto;
 import com.jm.jamesapp.models.dto.UpdateUserDto;
+import com.jm.jamesapp.security.IAuthenticationFacade;
 import com.jm.jamesapp.security.exceptions.UnauthorizedException;
 import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 @RestController
@@ -33,14 +29,17 @@ import java.util.UUID;
 @RequestMapping("/users")
 public class UserController {
 
+    private final IAuthenticationFacade authenticationFacade;
+
     final IUserService userService;
 
-    public UserController(IUserService userService) {
+    public UserController(IUserService userService, IAuthenticationFacade authenticationFacade) {
         this.userService = userService;
+        this.authenticationFacade = authenticationFacade;
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDto> saveUser(@RequestBody @Valid ApiUserRequestDto apiUserRequestDto) {
+    public ResponseEntity<UserResponseDto> save(@RequestBody @Valid ApiUserRequestDto apiUserRequestDto) {
         if(this.userService.findByUsername(apiUserRequestDto.username()) != null) throw new DataIntegrityViolationException("Username already exists");
         if(this.userService.findByEmail(apiUserRequestDto.email()) != null) throw new DataIntegrityViolationException("E-mail already exists");
 
@@ -49,28 +48,17 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<UserResponseDto>> getAllUsers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
-        var userList = userService.findAll(pageable);
+    public ResponseEntity<Page<UserResponseDto>> getAll(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
 
-        if(userList.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Page<UserModel> userList = userService.findAll(pageable);
+        Page<UserResponseDto> pageResponse = userList.map(UserResponseDto::new);
 
-        var responseList = new ArrayList<UserResponseDto>();
-
-        for (var user: userList) {
-            responseList.add(new UserResponseDto(user));
-        }
-
-        Page<UserResponseDto> pageResponse = new PageImpl<>(responseList, pageable, responseList.size());
         return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponseDto> getOneUser(@PathVariable(value="id") UUID id, Authentication authentication){
-        UserModel userModel = (UserModel) authentication.getPrincipal();
+    public ResponseEntity<UserResponseDto> getOne(@PathVariable(value="id") UUID id){
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
         UserModel userO = userService.findById(id);
         if(userO == null) throw new ObjectNotFoundException(id, "user");
@@ -78,9 +66,8 @@ public class UserController {
     }
 
     @GetMapping("/byEmail")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponseDto> getByEmail(@RequestParam(value = "email", defaultValue = "") String email, Authentication authentication){
-        UserModel userModel = (UserModel) authentication.getPrincipal();
+    public ResponseEntity<UserResponseDto> getByEmail(@RequestParam(value = "email", defaultValue = "") String email){
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
         if(email.isEmpty()) throw new ObjectNotFoundException(email, "user");
@@ -92,22 +79,22 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDto> getMe(Authentication authentication){
-        UserModel userModel = (UserModel) authentication.getPrincipal();
+    public ResponseEntity<UserResponseDto> getMe(){
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(userModel));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> update(@PathVariable(value="id") UUID id, @RequestBody @Valid ApiUpdateUserRequestDto apiRequestDto, Authentication authentication) {
-        UserModel userModel = (UserModel) authentication.getPrincipal();
+    public ResponseEntity<UserResponseDto> update(@PathVariable(value="id") UUID id, @RequestBody @Valid ApiUpdateUserRequestDto apiRequestDto) {
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
-        UserModel userToUpdate;
+        UserModel userToUpdate = null;
         if (userModel.getRole() == UserModel.UserRole.ADMIN){
             userToUpdate = userService.findById(id);
-        } else {
-            userToUpdate = userService.findById(userModel.getId());
+        } else if (id == userModel.getId()){
+            userToUpdate = userService.findById(id);
         }
 
         if(userToUpdate == null) throw new ObjectNotFoundException(id, "user");
@@ -118,17 +105,21 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    //Todo Colocar regras para deletar o proprio usuário (não sendo admin)
-    public ResponseEntity<Object> deleteUser(@PathVariable(value="id") UUID id, Authentication authentication){
-        UserModel userModel = (UserModel) authentication.getPrincipal();
+    public ResponseEntity<Object> delete(@PathVariable(value="id") UUID id){
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
-        UserModel userO = userService.findById(id);
-        if(userO == null) throw new ObjectNotFoundException(id, "user");
+        UserModel userToDelete = null;
+        if(userModel.getRole() == UserModel.UserRole.ADMIN){
+            userToDelete = userService.findById(id);
+        } else if (id == userModel.getId()){
+            userToDelete = userService.findById(id);
+        }
 
-        userService.delete(userO);
-        return new ResponseEntity<>(HttpStatus.OK);
+        if(userToDelete == null) throw new ObjectNotFoundException(id, "user");
+
+        userService.delete(userToDelete);
+        return ResponseEntity.noContent().build();
     }
 
 }
