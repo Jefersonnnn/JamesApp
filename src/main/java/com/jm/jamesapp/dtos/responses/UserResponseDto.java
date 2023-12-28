@@ -6,10 +6,11 @@ import java.util.UUID;
 
 public record UserResponseDto(
         UUID id,
+        String name,
         String username,
         String email) {
 
     public UserResponseDto(UserModel userModel) {
-        this(userModel.getId(), userModel.getUsername(), userModel.getEmail());
+        this(userModel.getId(), userModel.getName(), userModel.getUsername(), userModel.getEmail());
     }
 }

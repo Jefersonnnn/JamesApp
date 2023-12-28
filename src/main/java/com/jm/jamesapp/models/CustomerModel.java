@@ -31,7 +31,7 @@ public class CustomerModel extends BaseModel implements Serializable {
             joinColumns = @JoinColumn(name = "customer_id"),
             inverseJoinColumns = @JoinColumn(name = "groupbill_id")
     )
-    private Set<GroupBillModel> groupBills;
+    private Set<GroupBillModel> groupBills = new HashSet<>();
 
     public CustomerModel() {}
 
@@ -41,7 +41,6 @@ public class CustomerModel extends BaseModel implements Serializable {
         this.cpfCnpj = cpfCnpj;
     }
 
-    // TODO: TIRAR GET/SET
     public Set<GroupBillModel> getGroupBills() {
         return groupBills;
     }

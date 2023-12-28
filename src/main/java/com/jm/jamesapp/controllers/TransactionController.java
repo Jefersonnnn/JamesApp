@@ -52,7 +52,7 @@ public class TransactionController {
 
         if(customerSender == null) throw new ObjectNotFoundException(apiTransactionRequestDto.customerCpfCnpj(), "customer");
 
-        var transaction = transactionService.save(new SaveTransactionDto(apiTransactionRequestDto), userModel);
+        var transaction = transactionService.register(new SaveTransactionDto(apiTransactionRequestDto), userModel);
 
         var transactionResponse = new TransactionResponseDto(transaction);
 

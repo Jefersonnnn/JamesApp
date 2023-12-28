@@ -18,4 +18,6 @@ public interface TransactionRepository extends JpaRepository<TransactionModel, U
     Page<TransactionModel> findAllByCustomer(Pageable pageable, CustomerModel customerModel);
     List<TransactionModel> findAllByCustomer(CustomerModel customerModel);
     Optional<TransactionModel> findByIdAndUser(UUID id, UserModel userModel);
+
+
 }

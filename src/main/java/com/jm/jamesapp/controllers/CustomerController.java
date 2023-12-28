@@ -77,7 +77,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable(value="id") UUID id,
+    public ResponseEntity<CustomerResponseDto> update(@PathVariable(value="id") UUID id,
                                                 @RequestBody @Valid ApiCustomerRequestDto apiCustomerRequestDto,
                                                  Authentication authentication) {
         UserModel userModel = (UserModel) authentication.getPrincipal();

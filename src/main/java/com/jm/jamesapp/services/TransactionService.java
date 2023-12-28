@@ -34,7 +34,7 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public TransactionModel save(SaveTransactionDto saveTransactionDto, UserModel userModel) {
+    public TransactionModel register(SaveTransactionDto saveTransactionDto, UserModel userModel) {
         validateSaveTransaction(saveTransactionDto, userModel);
 
         TransactionModel transaction = new TransactionModel();

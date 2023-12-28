@@ -2,6 +2,7 @@ package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.models.dto.SaveUserDto;
+import com.jm.jamesapp.models.dto.UpdateUserDto;
 import com.jm.jamesapp.repositories.UserRepository;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import org.springframework.data.domain.Page;
@@ -43,8 +44,12 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserModel update(UserModel objModel) {
-        return userRepository.save(objModel);
+    public UserModel update(UserModel userModel, UpdateUserDto updateUserDto) {
+        if (updateUserDto.getName() != null) userModel.setName(updateUserDto.getName());
+        if (updateUserDto.getUsername() != null) userModel.setUsername(updateUserDto.getUsername());
+        if (updateUserDto.getEmail() != null) userModel.setEmail(updateUserDto.getEmail());
+
+        return userRepository.save(userModel);
     }
 
     @Override

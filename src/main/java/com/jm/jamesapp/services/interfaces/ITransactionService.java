@@ -19,7 +19,7 @@ public interface ITransactionService {
     Page<TransactionModel> findAllByUser(Pageable pageable, UserModel userModel);
 
     @Transactional
-    TransactionModel save(SaveTransactionDto saveTransactionDto, UserModel userModel);
+    TransactionModel register(SaveTransactionDto saveTransactionDto, UserModel userModel);
 
     @Transactional
     TransactionModel update(TransactionModel transaction, UpdateTransactionDto updateTransactionDto, UserModel userModel);

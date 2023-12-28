@@ -52,7 +52,8 @@ public class AuthenticationController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDto> register(@RequestBody @Valid ApiUserRequestDto apiUserRequestDto){
 
-        if(this.userService.findByUsername(apiUserRequestDto.username()) != null) throw new DataIntegrityViolationException("User already exists");
+        if(this.userService.findByUsername(apiUserRequestDto.username()) != null) throw new DataIntegrityViolationException("Username already exists");
+        if(this.userService.findByEmail(apiUserRequestDto.email()) != null) throw new DataIntegrityViolationException("E-mail already exists");
 
         var newUser = userService.save(new SaveUserDto(apiUserRequestDto));
 
