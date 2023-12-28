@@ -19,9 +19,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Value("${server.error.include-exception}")
     private boolean printStackTrace;
@@ -59,7 +60,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
     public ResponseEntity<Object> handleDataIntegrityViolationException(
             DataIntegrityViolationException exception,
             WebRequest request
@@ -86,7 +86,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ObjectNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<Object> handleObjectNotFoundException(
             ObjectNotFoundException exception,
             WebRequest request
@@ -98,7 +97,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // TODO: TIREI O @ResponseStatus, testar se precisa mesmo
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Object> handleAllUncaughtException(BusinessException exception, WebRequest request) {
         return buildErrorResponse(exception, exception.getMessage(), HttpStatus.BAD_REQUEST, request);

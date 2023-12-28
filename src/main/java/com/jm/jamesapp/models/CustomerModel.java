@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -13,13 +14,16 @@ import java.util.Set;
 public class CustomerModel extends BaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-
     @ManyToOne
     private UserModel user;
     @Column(nullable = false)
     private String name;
     @Column(nullable = false, length = 14)
     private String cpfCnpj;
+
+    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
+    //Todo: Como arrumar o erro: Hibernate could not initialize proxy – no Session
+    private Set<TransactionModel> transactions = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
@@ -40,6 +44,10 @@ public class CustomerModel extends BaseModel implements Serializable {
     // TODO: TIRAR GET/SET
     public Set<GroupBillModel> getGroupBills() {
         return groupBills;
+    }
+
+    public Set<TransactionModel> getTransactions() {
+        return transactions;
     }
 
     public String getName() {

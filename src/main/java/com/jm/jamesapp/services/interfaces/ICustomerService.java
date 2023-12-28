@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public interface ICustomerService {
@@ -32,4 +33,6 @@ public interface ICustomerService {
 
     @Nullable
     CustomerModel findByCpfCnpjAndUser(String cpfCnpj, UserModel userModel);
+
+    BigDecimal calculateBalance(UUID id, UserModel userModel);
 }

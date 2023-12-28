@@ -1,17 +1,21 @@
 package com.jm.jamesapp.services;
 
+import com.jm.jamesapp.models.CustomerModel;
+import com.jm.jamesapp.models.TransactionModel;
+import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.models.dto.SaveCustomerDto;
 import com.jm.jamesapp.models.dto.UpdateCustomerDto;
-import com.jm.jamesapp.models.CustomerModel;
-import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.repositories.CustomerRepository;
 import com.jm.jamesapp.services.exceptions.BusinessException;
+import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.utils.constraints.CpfOrCnpjValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.jm.jamesapp.utils.constraints.CpfOrCnpjValidator.cleanStringValue;
@@ -38,7 +42,7 @@ public class CustomerService implements ICustomerService {
 
     @Override
     public CustomerModel update(CustomerModel customer, UpdateCustomerDto saveCustomerDto, UserModel userModel) {
-        validateUpdate(saveCustomerDto, userModel);
+        validateUpdate(customer, saveCustomerDto, userModel);
 
         customer.setName(saveCustomerDto.getName());
         customer.setCpfCnpj(cleanStringValue(saveCustomerDto.getCpfCnpj()));
@@ -77,13 +81,40 @@ public class CustomerService implements ICustomerService {
         return customerRepository.findByCpfCnpjAndUser(CpfOrCnpjValidator.cleanStringValue(cpfCnpj), userModel).orElse(null);
     }
 
-    private void validateSave(SaveCustomerDto customerModel, UserModel userModel) {
-        boolean isCustomerAlreadyRegistered = findByCpfCnpjAndUser(customerModel.getCpfCnpj(), userModel) != null;
-        if (isCustomerAlreadyRegistered) throw new BusinessException("Você possui um cliente cadastrado com o CPF/CNPJ informado.");
+    @Override
+    public BigDecimal calculateBalance(UUID id, UserModel userModel) {
+        CustomerModel customerModel = findById(id);
+        if (customerModel == null) throw new ObjectNotFoundException(id, "customer");
+
+        Set<TransactionModel> transactions = customerModel.getTransactions();
+        BigDecimal balance = BigDecimal.ZERO;
+        for (TransactionModel transaction : transactions) {
+            if (transaction.getStatus() != TransactionModel.StatusTransaction.CANCELED) {
+                balance = balance.add(transaction.getAmount());
+            }
+        }
+        return balance;
     }
 
-    private void validateUpdate(UpdateCustomerDto customerDto, UserModel userModel) {
-        boolean isCustomerAlreadyRegistered = findByCpfCnpjAndUser(customerDto.getCpfCnpj(), userModel) != null;
-        if (isCustomerAlreadyRegistered) throw new BusinessException("Você possui um cliente cadastrado com o CPF/CNPJ informado.");
+    private void validateSave(SaveCustomerDto customerModel, UserModel userModel) {
+        boolean isCustomerAlreadyRegistered = findByCpfCnpjAndUser(customerModel.getCpfCnpj(), userModel) != null;
+        if (isCustomerAlreadyRegistered)
+            throw new BusinessException("Você possui um cliente cadastrado com o CPF/CNPJ informado.");
+    }
+
+    private void validateUpdate(CustomerModel customer, UpdateCustomerDto customerDto, UserModel userModel) {
+        if (customer == null || customerDto == null) throw new RuntimeException("");
+
+        var oldCpfCnpj = customer.getCpfCnpj();
+        var newCpfCnpj = cleanStringValue(customerDto.getCpfCnpj());
+
+        if (oldCpfCnpj.equals(newCpfCnpj) && customer.getName().equals(customerDto.getName()))
+            throw new BusinessException("Os novos dados são iguais aos dados originais. Nenhuma alteração foi feita.");
+
+        if (oldCpfCnpj.equals(newCpfCnpj)) return;
+
+        boolean isCustomerAlreadyRegistered = findByCpfCnpjAndUser(newCpfCnpj, userModel) != null;
+        if (!isCustomerAlreadyRegistered)
+            throw new BusinessException("Você possui um cliente cadastrado com o CPF/CNPJ informado.");
     }
 }

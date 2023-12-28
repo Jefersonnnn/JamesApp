@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -50,7 +51,7 @@ public class CustomerController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<CustomerResponseDto>> getAllCustomers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Authentication authentication){
+    public ResponseEntity<Page<CustomerResponseDto>> getAll(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Authentication authentication){
 
         // TODO: Analisar como deixar esse authentication global para não precisar receber em cada action
         UserModel userModel = (UserModel) authentication.getPrincipal();
@@ -101,6 +102,17 @@ public class CustomerController {
         customerService.delete(customer);
 
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/{id}/balance")
+    public ResponseEntity<BigDecimal> balance(@PathVariable(value="id") UUID id, Authentication authentication){
+        var userModel = (UserModel) authentication.getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
+
+        BigDecimal balance = customerService.calculateBalance(id, userModel);
+        if (balance == null) throw new ObjectNotFoundException(id, "customer");
+
+        return ResponseEntity.ok(balance);
     }
 
 }
