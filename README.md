@@ -12,26 +12,29 @@ onde um usuário recebe transferencias de cada pessoa, e esta pessoa pode partic
 
 ## Principais Funcionalidades
 
+- Registro de usuários
 - Registro de clientes (pessoas).
 - Criação e gerenciamento de grupos.
-- Criação de faturas (bills) por um usuário.
-- Registro de transações, incluindo pagamentos e reembolsos.
+- Registro de transações pelos clientes.
 - Atualização automática do saldo dos clientes com base nas transações.
+- Fechamento dos grupos e registro de participantes pelo periodo definido.
 
 ## Principais Rotas
 
 ### Auth
-- **POST /api/auth/register:**
-- **POST /api/auth/login:**
+- **POST /api/auth/register:** Cria um novo usuário
+- **POST /api/auth/login:** Realiza login retornando um token de acesso
 ### Users
 - **GET /api/me:** Retorna o usuário atual
 - **GET /api/users:** Retorna a lista de todos os usuários
-- **GET /api/users/{id}:**
+- **GET /api/users/{id}:** Retorna o usuário do id
 ### Customers
-- **GET /api/customers:** Retorna a lista de todos os clientes.
-### GroupBills
-- **GET /api/groups:** Retorna a lista de todos os grupos.
-- **POST /api/groups:** Cria um novo grupo.
+- **POST /api/customers:** Cria um novo cliente
+- **GET /api/customers:** Retorna a lista de todos os cliente.
+- **GET /api/customers/{id}:** Retorna o saldo do cliente
+### Group Bills
+- **GET /api/groupbills:** Retorna a lista de todos os grupos.
+- **POST /api/groupsbills:** Cria um novo grupo.
 ### Transactions
 - **GET /api/transactions:** Retorna a lista de todas as transações.
 - **POST /api/transactions:** Registra uma nova transação.
@@ -42,7 +45,8 @@ A documentação detalhada das rotas e seus parâmetros pode ser encontrada [aqu
 
 ## Configuração do Banco de Dados
 
-Esta aplicação usa um banco de dados [inserir nome do banco de dados] para armazenar informações de clientes, grupos, faturas e transações. Certifique-se de configurar as propriedades de conexão do banco de dados no arquivo `application.properties` ou `application.yml`.
+Para armazenar informações de clientes, grupos, faturas e transações. 
+Certifique-se de configurar as propriedades de conexão do banco de dados nos arquivos `application-dev.properties` e/ou `application-prod.properties` (é necessário mudar o profile no arquivo `application.properties`) .
 
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/nome_do_banco
@@ -56,6 +60,3 @@ spring.datasource.password=sua_senha
 3. Execute a aplicação com o comando ./mvnw spring-boot:run (Maven Wrapper) 
 ou mvn spring-boot:run (se você tiver o Maven instalado).
 4. Acesse a API em http://localhost:8080.
-
-# Licença
-Este projeto é licenciado sob a Licença MIT.
