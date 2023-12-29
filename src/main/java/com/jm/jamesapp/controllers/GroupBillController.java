@@ -5,7 +5,7 @@ import com.jm.jamesapp.dtos.responses.CustomerResponseDto;
 import com.jm.jamesapp.dtos.responses.GroupBillResponseDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.GroupBillModel;
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.dto.SaveGroupBillDto;
 import com.jm.jamesapp.models.dto.UpdateGroupBillDto;
 import com.jm.jamesapp.security.IAuthenticationFacade;
@@ -26,7 +26,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @RestController

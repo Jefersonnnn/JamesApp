@@ -1,19 +1,14 @@
 package com.jm.jamesapp.models.dto;
 
-import com.jm.jamesapp.dtos.requests.ApiCustomerRequestDto;
 import com.jm.jamesapp.dtos.requests.ApiUserRequestDto;
-import com.jm.jamesapp.models.UserModel;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import com.jm.jamesapp.models.user.enums.UserRole;
 
 public class SaveUserDto {
     private String name;
     private String username;
     private String email;
     private String password;
-    private UserModel.UserRole role;
+    private UserRole role;
 
     public SaveUserDto(){}
 
@@ -57,11 +52,11 @@ public class SaveUserDto {
         this.password = password;
     }
 
-    public UserModel.UserRole getRole() {
+    public UserRole getRole() {
         return role;
     }
 
-    public void setRole(UserModel.UserRole role) {
+    public void setRole(UserRole role) {
         this.role = role;
     }
 }

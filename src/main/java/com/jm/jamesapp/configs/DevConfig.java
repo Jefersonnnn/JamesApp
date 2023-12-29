@@ -1,13 +1,5 @@
 package com.jm.jamesapp.configs;
 
-import com.jm.jamesapp.dtos.requests.ApiCustomerRequestDto;
-import com.jm.jamesapp.dtos.requests.ApiGroupBillRequestDto;
-import com.jm.jamesapp.dtos.requests.ApiTransactionRequestDto;
-import com.jm.jamesapp.dtos.requests.ApiUserRequestDto;
-import com.jm.jamesapp.models.CustomerModel;
-import com.jm.jamesapp.models.GroupBillModel;
-import com.jm.jamesapp.models.UserModel;
-import com.jm.jamesapp.models.dto.*;
 import com.jm.jamesapp.repositories.CustomerRepository;
 import com.jm.jamesapp.repositories.GroupBillRepository;
 import com.jm.jamesapp.repositories.TransactionRepository;
@@ -16,16 +8,10 @@ import com.jm.jamesapp.services.CustomerService;
 import com.jm.jamesapp.services.GroupBillService;
 import com.jm.jamesapp.services.TransactionService;
 import com.jm.jamesapp.services.UserService;
-import com.jm.jamesapp.services.exceptions.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
 
 @Configuration
 @Profile("dev")

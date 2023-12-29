@@ -1,13 +1,12 @@
 package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.CustomerModel;
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.dto.SaveCustomerDto;
 import com.jm.jamesapp.models.dto.UpdateCustomerDto;
 import com.jm.jamesapp.repositories.CustomerRepository;
 import com.jm.jamesapp.services.exceptions.BusinessException;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
-import com.jm.jamesapp.services.interfaces.ITransactionService;
 import com.jm.jamesapp.utils.constraints.CpfOrCnpjValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

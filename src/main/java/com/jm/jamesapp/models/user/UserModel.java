@@ -1,7 +1,10 @@
-package com.jm.jamesapp.models;
+package com.jm.jamesapp.models.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jm.jamesapp.dtos.requests.ApiUserRequestDto;
+import com.jm.jamesapp.models.BaseModel;
+import com.jm.jamesapp.models.CustomerModel;
+import com.jm.jamesapp.models.GroupBillModel;
+import com.jm.jamesapp.models.user.enums.UserRole;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -38,39 +41,7 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     @Enumerated(value = EnumType.STRING)
     private UserRole role;
 
-    public UserModel(){}
-
-    public UserModel(String name, String username, String email, String password, UserRole role) {
-        this.name = name;
-        setUsername(this.username = username);
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
-
-    public UserModel(ApiUserRequestDto data) {
-        this.name = data.name();
-        setUsername(data.username());
-        this.email = data.email();
-        this.password = data.password();
-        this.role = data.role();
-    }
-
-    public enum UserRole {
-        ADMIN("admin"),
-        USER("user");
-
-        private String role;
-
-        UserRole(String role){
-            this.role = role;
-        }
-
-        public String getRole(){
-            return role;
-        }
-    }
-
+    public UserModel() { }
 
     public List<CustomerModel> getCustomers() {
         return customers;
@@ -89,10 +60,9 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     }
 
     public void setUsername(String username) {
-        username = username.replace(" ", "_");
-        username = username.toLowerCase();
         this.username = username;
     }
+
     @Override
     public String getUsername() {
         return username;

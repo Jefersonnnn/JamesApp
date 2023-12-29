@@ -4,7 +4,7 @@ import com.jm.jamesapp.dtos.requests.ApiTransactionRequestDto;
 import com.jm.jamesapp.dtos.responses.TransactionResponseDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.TransactionModel;
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.dto.SaveTransactionDto;
 import com.jm.jamesapp.models.dto.UpdateTransactionDto;
 import com.jm.jamesapp.security.IAuthenticationFacade;

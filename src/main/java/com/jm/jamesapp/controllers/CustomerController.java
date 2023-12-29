@@ -3,7 +3,7 @@ package com.jm.jamesapp.controllers;
 import com.jm.jamesapp.dtos.requests.ApiCustomerRequestDto;
 import com.jm.jamesapp.dtos.responses.CustomerResponseDto;
 import com.jm.jamesapp.models.CustomerModel;
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.dto.SaveCustomerDto;
 import com.jm.jamesapp.models.dto.UpdateCustomerDto;
 import com.jm.jamesapp.security.IAuthenticationFacade;

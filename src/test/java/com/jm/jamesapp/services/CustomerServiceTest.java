@@ -1,7 +1,7 @@
 package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.CustomerModel;
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
