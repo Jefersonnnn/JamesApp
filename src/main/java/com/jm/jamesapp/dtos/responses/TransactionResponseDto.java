@@ -1,6 +1,8 @@
 package com.jm.jamesapp.dtos.responses;
 
-import com.jm.jamesapp.models.TransactionModel;
+import com.jm.jamesapp.models.transaction.TransactionModel;
+import com.jm.jamesapp.models.transaction.enums.TransactionOrigin;
+import com.jm.jamesapp.models.transaction.enums.TransactionType;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -9,28 +11,24 @@ import java.util.UUID;
 
 public record TransactionResponseDto(
         UUID id,
-        boolean automatic,
+        TransactionOrigin origin,
         Date dueDate,
-        TransactionModel.TypeTransaction type,
+        TransactionType type,
         UUID ownerId,
         UUID customerId,
         BigDecimal amount,
-        String description,
-        TransactionModel.StatusTransaction status,
-        String cancelDescription
+        String description
         ) {
         public TransactionResponseDto(TransactionModel transaction) {
                 this(
                         transaction.getId(),
-                        transaction.isAutomatic(),
-                        transaction.getDueDate(),
-                        transaction.getTypeTransaction(),
+                        transaction.getOrigin(),
+                        transaction.getPaymentDate(),
+                        transaction.getType(),
                         transaction.getUser().getId(),
                         transaction.getCustomer().getId(),
                         transaction.getAmount(),
-                        transaction.getDescription(),
-                        transaction.getStatus(),
-                        transaction.getCancelDescription()
+                        transaction.getDescription()
                 );
         }
 }

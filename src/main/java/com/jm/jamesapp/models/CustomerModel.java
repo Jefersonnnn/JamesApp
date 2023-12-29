@@ -1,6 +1,7 @@
 package com.jm.jamesapp.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jm.jamesapp.models.transaction.TransactionModel;
 import com.jm.jamesapp.models.user.UserModel;
 import jakarta.persistence.*;
 

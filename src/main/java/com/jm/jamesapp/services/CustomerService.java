@@ -63,7 +63,10 @@ public class CustomerService implements ICustomerService {
     }
 
     public BigDecimal calculateBalance(CustomerModel customerModel) {
-        return customerRepository.sumTransactionsByCustomer(customerModel);
+        BigDecimal balance = customerRepository.sumTransactionsByCustomer(customerModel);
+        if (balance == null) balance = BigDecimal.valueOf(0.0);
+
+        return balance;
     }
 
     public void deleteWithPendingBalance(CustomerModel customer){

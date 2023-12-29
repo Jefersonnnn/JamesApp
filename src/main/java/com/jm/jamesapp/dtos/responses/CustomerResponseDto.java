@@ -1,31 +1,16 @@
 package com.jm.jamesapp.dtos.responses;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.jm.jamesapp.models.CustomerModel;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-
 public class CustomerResponseDto {
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private UUID id;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private UUID ownerId;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String name;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String cpfCnpj;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private BigDecimal balance;
-
-    public CustomerResponseDto(UUID id, UUID ownerId, String name, String cpfCnpj, BigDecimal balance) {
-        this.id = id;
-        this.ownerId = ownerId;
-        this.name = name;
-        this.cpfCnpj = cpfCnpj;
-        this.balance = balance;
-    }
 
     public CustomerResponseDto(CustomerModel customerModel, BigDecimal balance) {
         this.id = customerModel.getId();
@@ -40,10 +25,7 @@ public class CustomerResponseDto {
         this.ownerId = customerModel.getUser().getId();
         this.name = customerModel.getName();
         this.cpfCnpj = customerModel.getCpfCnpj();
-    }
-
-    public CustomerResponseDto(BigDecimal balance) {
-        this.balance = balance;
+        this.balance = BigDecimal.ZERO;
     }
 
     public UUID getId() {

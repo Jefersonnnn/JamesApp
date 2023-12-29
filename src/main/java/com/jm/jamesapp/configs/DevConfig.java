@@ -88,7 +88,7 @@ public class DevConfig implements CommandLineRunner {
 //            SaveTransactionDto debitGroup = new SaveTransactionDto();
 //            debitGroup.setAmount(BigDecimal.valueOf(-25));
 //            debitGroup.setDescription("Pagamento do grupo Suno bolado");
-//            debitGroup.setDueDate(Date.from(Instant.now()));
+//            debitGroup.setPaymentDate(Date.from(Instant.now()));
 //            debitGroup.setCustomerCpfCnpj("09256144913");
 //
 //            transactionService.register(debitGroup, user2);
@@ -96,7 +96,7 @@ public class DevConfig implements CommandLineRunner {
 //            SaveTransactionDto debitGroup2 = new SaveTransactionDto();
 //            debitGroup2.setAmount(BigDecimal.valueOf(-133));
 //            debitGroup2.setDescription("Pagamento do grupo Suno bolado");
-//            debitGroup2.setDueDate(Date.from(Instant.now()));
+//            debitGroup2.setPaymentDate(Date.from(Instant.now()));
 //            debitGroup2.setCustomerCpfCnpj("09256144913");
 //
 //            transactionService.register(debitGroup2, user2);
