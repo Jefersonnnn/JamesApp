@@ -2,18 +2,40 @@ package com.jm.jamesapp.services.interfaces;
 
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.dto.SaveCustomerDto;
+import com.jm.jamesapp.models.dto.UpdateCustomerDto;
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 
-import java.util.List;
-import java.util.Optional;
+import java.math.BigDecimal;
 import java.util.UUID;
 
-public interface ICustomerService extends IBaseService<CustomerModel> {
+public interface ICustomerService {
 
-    Optional<CustomerModel> findByIdAndOwner(UUID id, UserModel userModel);
+    @Transactional
+    CustomerModel save(SaveCustomerDto saveCustomerDto, UserModel userModel);
 
-    Optional<CustomerModel> findByCpfCnpj(String cpfCnpj);
+    @Transactional
+    CustomerModel update(CustomerModel customer, UpdateCustomerDto updateCustomerDto, UserModel userModel);
 
-    Optional<CustomerModel> findByCpfCnpjAndOwner(String cpfCnpj, UserModel userModel);
+    @Nullable
+    CustomerModel findById(UUID id);
 
-    List<CustomerModel> findAllByOwner(UserModel userModel);
+    @Transactional
+    void delete(CustomerModel customer);
+
+    @Transactional
+    void deleteWithPendingBalance(CustomerModel customer);
+
+    @Nullable
+    CustomerModel findByIdAndUser(UUID id, UserModel userModel);
+
+    Page<CustomerModel> findAllByUser(Pageable pageable, UserModel userModel);
+
+    @Nullable
+    CustomerModel findByCpfCnpjAndUser(String cpfCnpj, UserModel userModel);
+
+    BigDecimal calculateBalance(CustomerModel customerModel);
 }

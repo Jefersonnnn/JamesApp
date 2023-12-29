@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 
-public record CustomerRequestRecordDto(
+public record ApiCustomerRequestDto(
         @NotBlank String name,
         @NotNull @ValidCpfOrCnpj String cpfCnpj
 ) {}

@@ -5,13 +5,14 @@ import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 
 @Entity
-@Table(name = "TB_GROUP_BILLS", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "owner_id"})})
+@Table(name = "TB_GROUP_BILLS", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "user_id"})})
 public class GroupBillModel extends BaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -20,27 +21,27 @@ public class GroupBillModel extends BaseModel implements Serializable {
     private String name;
 
     @ManyToOne
-    private UserModel owner;
+    private UserModel user;
 
     @Column(nullable = false)
     private BigDecimal totalPayment;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private BillingFrequency billingFrequency;
-    @Column(nullable = false)
-    private Integer dueDateDay;
-
-    @Column(nullable = false)
-    private Integer dueDateHour;
 
     private String description;
 
-    @ManyToMany(mappedBy = "groupBills")
-    private Set<CustomerModel> customers;
+    @ManyToMany
+    @JoinTable(
+            name = "tb_groupbill_customers",
+            joinColumns = @JoinColumn(name = "groupbill_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id")
+    )
+    private Set<CustomerModel> customers = new HashSet<>();
 
     public enum BillingFrequency {
         DAILY("Daily"),
-        WEEKLY("Weekly"),
         MONTHLY("Monthly"),
         ANNUALLY("Annually");
 
@@ -60,10 +61,6 @@ public class GroupBillModel extends BaseModel implements Serializable {
         return customers;
     }
 
-    public void setCustomers(Set<CustomerModel> customers) {
-        this.customers = customers;
-    }
-
     public String getName() {
         return name;
     }
@@ -72,12 +69,12 @@ public class GroupBillModel extends BaseModel implements Serializable {
         this.name = name;
     }
 
-    public UserModel getOwner() {
-        return owner;
+    public UserModel getUser() {
+        return user;
     }
 
-    public void setOwner(UserModel owner) {
-        this.owner = owner;
+    public void setUser(UserModel user) {
+        this.user = user;
     }
 
     public BigDecimal getTotalPayment() {
@@ -94,22 +91,6 @@ public class GroupBillModel extends BaseModel implements Serializable {
 
     public void setBillingFrequency(BillingFrequency billingFrequency) {
         this.billingFrequency = billingFrequency;
-    }
-
-    public Integer getDueDateDay() {
-        return dueDateDay;
-    }
-
-    public void setDueDateDay(Integer dueDateDay) {
-        this.dueDateDay = dueDateDay;
-    }
-
-    public Integer getDueDateHour() {
-        return dueDateHour;
-    }
-
-    public void setDueDateHour(Integer dueDateHour) {
-        this.dueDateHour = dueDateHour;
     }
 
     public String getDescription() {

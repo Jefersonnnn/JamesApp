@@ -13,15 +13,17 @@ public class TransactionModel extends BaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @Enumerated(EnumType.STRING)
     private TypeTransaction typeTransaction;
     @Temporal(TemporalType.TIMESTAMP)
     private Date dueDate;
     @ManyToOne
-    private UserModel owner;
+    private UserModel user;
     @ManyToOne
     private CustomerModel customer;
     private BigDecimal amount;
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private StatusTransaction status;
     private String description;
     private String cancelDescription;
@@ -68,12 +70,12 @@ public class TransactionModel extends BaseModel implements Serializable {
         this.automatic = automatic;
     }
 
-    public UserModel getOwner() {
-        return owner;
+    public UserModel getUser() {
+        return user;
     }
 
-    public void setOwner(UserModel owner) {
-        this.owner = owner;
+    public void setUser(UserModel user) {
+        this.user = user;
     }
 
     public TypeTransaction getTypeTransaction() {

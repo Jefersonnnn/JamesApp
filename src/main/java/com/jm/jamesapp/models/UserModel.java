@@ -1,8 +1,7 @@
 package com.jm.jamesapp.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jm.jamesapp.dtos.requests.UserRequestRecordDto;
-import com.jm.jamesapp.utils.constraints.enums.UserRole;
+import com.jm.jamesapp.dtos.requests.ApiUserRequestDto;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,9 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "TB_USERS")
@@ -23,6 +20,8 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     private static final long serialVersionUID = 1L;
 
     @Column(nullable = false)
+    private String name;
+    @Column(nullable = false)
     private String username;
     @Column(unique = true, nullable = false)
     private String email;
@@ -30,33 +29,46 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "user")
     private List<CustomerModel> customers;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "user")
     private List<GroupBillModel> groupBills;
 
-    //Todo: Adicionar a lista de Transações e talvez adicionar um método para retornar o saldo ou recalcular o saldo
-    // com base nas transações feitas (indexação?)?
-
+    @Enumerated(value = EnumType.STRING)
     private UserRole role;
 
-    public UserModel(){
+    public UserModel(){}
 
-    }
-
-    public UserModel(String username, String email, String password, UserRole role) {
-        this.username = username;
+    public UserModel(String name, String username, String email, String password, UserRole role) {
+        this.name = name;
+        setUsername(this.username = username);
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
-    public UserModel(UserRequestRecordDto data) {
-        this.username = data.username();
+    public UserModel(ApiUserRequestDto data) {
+        this.name = data.name();
+        setUsername(data.username());
         this.email = data.email();
         this.password = data.password();
         this.role = data.role();
+    }
+
+    public enum UserRole {
+        ADMIN("admin"),
+        USER("user");
+
+        private String role;
+
+        UserRole(String role){
+            this.role = role;
+        }
+
+        public String getRole(){
+            return role;
+        }
     }
 
 
@@ -64,19 +76,21 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
         return customers;
     }
 
-    public void setCustomers(List<CustomerModel> customers) {
-        this.customers = customers;
-    }
-
     public List<GroupBillModel> getGroupBills() {
         return groupBills;
     }
 
-    public void setGroupBills(List<GroupBillModel> groupBills) {
-        this.groupBills = groupBills;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setUsername(String username) {
+        username = username.replace(" ", "_");
+        username = username.toLowerCase();
         this.username = username;
     }
     @Override
@@ -122,8 +136,7 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
 
     @Override
     public boolean isEnabled() {
-        // Todo: Melhorar depois
-        return true;
+        return !this.isDeleted();
     }
 
     @Override

@@ -1,147 +1,117 @@
 package com.jm.jamesapp.controllers;
 
-import com.jm.jamesapp.dtos.requests.CustomerRequestRecordDto;
-import com.jm.jamesapp.dtos.responses.CustomerResponseRecordDto;
+import com.jm.jamesapp.dtos.requests.ApiCustomerRequestDto;
+import com.jm.jamesapp.dtos.responses.CustomerResponseDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.dto.SaveCustomerDto;
+import com.jm.jamesapp.models.dto.UpdateCustomerDto;
+import com.jm.jamesapp.security.IAuthenticationFacade;
+import com.jm.jamesapp.security.exceptions.UnauthorizedException;
+import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
-import com.jm.jamesapp.services.interfaces.IUserService;
+import com.jm.jamesapp.services.interfaces.ITransactionService;
 import jakarta.validation.Valid;
-
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import java.math.BigDecimal;
 import java.util.UUID;
-
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/customers")
 public class CustomerController {
 
-    final ICustomerService customerService;
-    final IUserService userService;
+    private final IAuthenticationFacade authenticationFacade;
 
-    public CustomerController(ICustomerService customerService, IUserService userService) {
+    final ICustomerService customerService;
+
+    final ITransactionService transactionService;
+
+    public CustomerController(IAuthenticationFacade authenticationFacade, ICustomerService customerService, ITransactionService transactionService) {
+        this.authenticationFacade = authenticationFacade;
         this.customerService = customerService;
-        this.userService = userService;
+        this.transactionService = transactionService;
     }
 
     @PostMapping
-    public ResponseEntity<Object> saveCustomer(@RequestBody @Valid CustomerRequestRecordDto customerRequestRecordDto,
-                                               Authentication authentication) {
+    public ResponseEntity<CustomerResponseDto> save(@RequestBody @Valid ApiCustomerRequestDto apiCustomerRequestDto) {
+        var userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
 
-        var ownerUser = (UserModel) authentication.getPrincipal();
+        CustomerModel savedCustomer = customerService.save(new SaveCustomerDto(apiCustomerRequestDto), userModel);
 
-        if (ownerUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        var cpfCnpj = customerRequestRecordDto.cpfCnpj();
-        Optional<CustomerModel> existingCustomerModel = customerService.findByCpfCnpjAndOwner(cpfCnpj, ownerUser);
-
-        if (existingCustomerModel.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-
-        var customerModel = new CustomerModel(ownerUser, customerRequestRecordDto.name(), cpfCnpj);
-
-        customerService.save(customerModel);
-
-        var customerResponse = new CustomerResponseRecordDto(customerModel);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(customerResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new CustomerResponseDto(savedCustomer));
     }
 
     @GetMapping
-    public ResponseEntity<Page<CustomerResponseRecordDto>> getAllCustomers(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Authentication authentication){
+    public ResponseEntity<Page<CustomerResponseDto>> getAll(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+        var userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
 
-        var ownerUser = (UserModel) authentication.getPrincipal();
+        Page<CustomerModel> customersList = customerService.findAllByUser(pageable, userModel);
 
-        var customersList = customerService.findAllByOwner(ownerUser);
+        Page<CustomerResponseDto> pageResponse = customersList.map(CustomerResponseDto::new);
 
-//        if(customersList.isEmpty()){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-
-        var responseList = new ArrayList<CustomerResponseRecordDto>();
-
-        for (var customer:customersList) {
-            var cResponse = new CustomerResponseRecordDto(customer);
-            responseList.add(cResponse);
-        }
-
-        //Todo: Ver como funciona essa parada de Page
-        Page<CustomerResponseRecordDto> pageResponse = new PageImpl<>(responseList, pageable, responseList.size());
         return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getOneCustomer(@PathVariable(value="id") UUID id){
-        Optional<CustomerModel> customerO = customerService.findById(id);
+    public ResponseEntity<CustomerResponseDto> get(@PathVariable(value="id") UUID id){
+        var userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
 
-        if(customerO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found.");
-        }
+        CustomerModel customer = customerService.findByIdAndUser(id, userModel);
+        if (customer == null) throw new ObjectNotFoundException(id, "customer");
 
-        var customerResponse = new CustomerResponseRecordDto(customerO.get());
-
-        return ResponseEntity.status(HttpStatus.OK).body(customerResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(new CustomerResponseDto(customer));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateCustomer(@PathVariable(value="id") UUID id,
-                                                @RequestBody @Valid CustomerRequestRecordDto customerRequestRecordDto,
-                                                 Authentication authentication) {
-        var ownerUser = (UserModel) authentication.getPrincipal();
+    public ResponseEntity<CustomerResponseDto> update(@PathVariable(value="id") UUID id,
+                                                @RequestBody @Valid ApiCustomerRequestDto apiCustomerRequestDto) {
+        var userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
 
-        Optional<CustomerModel> customerO = customerService.findByIdAndOwner(id, ownerUser);
+        CustomerModel customer = customerService.findByIdAndUser(id, userModel);
+        if (customer == null) throw new ObjectNotFoundException(id, "customer");
 
-        if(customerO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        CustomerModel updatedCustomer = customerService.update(customer, new UpdateCustomerDto(apiCustomerRequestDto), userModel);
 
-        var cpfCnpj = customerRequestRecordDto.cpfCnpj();
-        Optional<CustomerModel> existingCustomerModel = customerService.findByCpfCnpjAndOwner(cpfCnpj, ownerUser);
-
-        if (existingCustomerModel.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-
-        var customerModel = customerO.get();
-
-        customerModel.setName(customerRequestRecordDto.name());
-        customerModel.setCpfCnpj(cpfCnpj);
-
-        customerModel.setUpdatedBy(ownerUser.getId());
-        customerService.update(customerModel);
-
-        var customerResponse = new CustomerResponseRecordDto(customerModel);
-
-        return ResponseEntity.status(HttpStatus.OK).body(customerResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(new CustomerResponseDto(updatedCustomer));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteCustomer(@PathVariable(value="id") UUID id, Authentication authentication){
-        var ownerUser = (UserModel) authentication.getPrincipal();
+    public ResponseEntity<Void> delete(@PathVariable(value="id") UUID id){
+        var userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
 
-        Optional<CustomerModel> customerO = customerService.findByIdAndOwner(id, ownerUser);
+        CustomerModel customer = customerService.findByIdAndUser(id, userModel);
+        if (customer == null) throw new ObjectNotFoundException(id, "customer");
 
-        if(customerO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        customerService.delete(customerO.get());
+        customerService.delete(customer);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @GetMapping("/{id}/balance")
+    public ResponseEntity<CustomerResponseDto> balance(@PathVariable(value="id") UUID id){
+        var userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
+
+        CustomerModel customer = customerService.findByIdAndUser(id, userModel);
+        if (customer == null) throw new ObjectNotFoundException(id, "customer");
+
+        BigDecimal balance = customerService.calculateBalance(customer);
+
+        if(balance == null) balance = BigDecimal.valueOf(0.0);
+
+        return ResponseEntity.ok(new CustomerResponseDto(balance));
+    }
 }

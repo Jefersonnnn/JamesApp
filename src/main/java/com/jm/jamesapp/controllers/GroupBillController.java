@@ -1,17 +1,22 @@
 package com.jm.jamesapp.controllers;
 
-import com.jm.jamesapp.dtos.requests.GroupBillRequestRecordDto;
-import com.jm.jamesapp.dtos.responses.GroupBillResponseRecordDto;
+import com.jm.jamesapp.dtos.requests.ApiGroupBillRequestDto;
+import com.jm.jamesapp.dtos.responses.CustomerResponseDto;
+import com.jm.jamesapp.dtos.responses.GroupBillResponseDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.GroupBillModel;
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.dto.SaveGroupBillDto;
+import com.jm.jamesapp.models.dto.UpdateGroupBillDto;
+import com.jm.jamesapp.security.IAuthenticationFacade;
+import com.jm.jamesapp.security.exceptions.UnauthorizedException;
+import com.jm.jamesapp.services.exceptions.BusinessException;
+import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.IGroupBillService;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -20,106 +25,115 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/groupbills")
 public class GroupBillController {
-
+    final IAuthenticationFacade authenticationFacade;
     final IUserService userService;
     final ICustomerService customerService;
     final IGroupBillService groupBillService;
 
-    public GroupBillController(IUserService userService, ICustomerService customerService, IGroupBillService groupBillService) {
+    public GroupBillController(IAuthenticationFacade authenticationFacade, IUserService userService, ICustomerService customerService, IGroupBillService groupBillService) {
+        this.authenticationFacade = authenticationFacade;
         this.userService = userService;
         this.customerService = customerService;
         this.groupBillService = groupBillService;
     }
 
     @PostMapping
-    public ResponseEntity<GroupBillResponseRecordDto> saveGroupBill(@RequestBody @Valid GroupBillRequestRecordDto groupBillRequestRecordDto, Authentication authentication) {
-        var ownerUser = (UserModel) authentication.getPrincipal();
+    public ResponseEntity<GroupBillResponseDto> save(@RequestBody @Valid ApiGroupBillRequestDto apiGroupBillRequestDto) {
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
 
-        if(ownerUser == null){
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+        if (userModel == null) throw new UnauthorizedException();
 
-        var groupBillModel = new GroupBillModel();
-        BeanUtils.copyProperties(groupBillRequestRecordDto, groupBillModel);
+        var groupBill = groupBillService.save(new SaveGroupBillDto(apiGroupBillRequestDto), userModel);
 
-        groupBillModel.setOwner(ownerUser);
-
-        groupBillService.save(groupBillModel);
-
-        var groupBillResponse = new GroupBillResponseRecordDto(groupBillModel);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(groupBillResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new GroupBillResponseDto(groupBill));
     }
 
     @GetMapping
-    public ResponseEntity<Page<GroupBillResponseRecordDto>> getAllGroupBills(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Authentication authentication){
+    public ResponseEntity<Page<GroupBillResponseDto>> getAll(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
 
-        var ownerUser = (UserModel) authentication.getPrincipal();
+        Page<GroupBillModel> groupBillsList = groupBillService.findAllByUser(pageable, userModel);
 
-        var groupBillsList = groupBillService.findAllByOwner(ownerUser);
-
-//        if(groupBillsList.isEmpty()){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-
-        var responseList = new ArrayList<GroupBillResponseRecordDto>();
-
-        for (var groupBill:groupBillsList) {
-            responseList.add(new GroupBillResponseRecordDto(groupBill));
-        }
-
-        Page<GroupBillResponseRecordDto> pageResponse = new PageImpl<>(responseList, pageable, responseList.size());
+        Page<GroupBillResponseDto> pageResponse = groupBillsList.map(GroupBillResponseDto::new);
 
         return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GroupBillResponseRecordDto> getOneGroupBill(@PathVariable(value="id") UUID id){
-        Optional<GroupBillModel> groupBillO = groupBillService.findById(id);
-        if(groupBillO.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<GroupBillResponseDto> getOne(@PathVariable(value = "id") UUID id) {
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
 
-        var groupBillResponse = new GroupBillResponseRecordDto(groupBillO.get());
+        GroupBillModel groupBillO = groupBillService.findById(id);
+        if (groupBillO == null) throw new ObjectNotFoundException(id, "group_bill");
 
-        return ResponseEntity.status(HttpStatus.OK).body(groupBillResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(new GroupBillResponseDto(groupBillO));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GroupBillResponseRecordDto> updateGroupBill(@PathVariable(value="id") UUID id,
-                                                @RequestBody @Valid GroupBillRequestRecordDto groupBillRequestRecordDto,
-                                                                      Authentication authentication) {
-        var ownerUser = (UserModel) authentication.getPrincipal();
+    public ResponseEntity<GroupBillResponseDto> update(@PathVariable(value = "id") UUID id,
+                                                       @RequestBody @Valid ApiGroupBillRequestDto apiGroupBillRequestDto) {
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
 
-        Optional<GroupBillModel> groupBillO = groupBillService.findById(id);
-        if(groupBillO.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        var groupBill = groupBillO.get();
-        BeanUtils.copyProperties(groupBillRequestRecordDto, groupBill);
-        groupBill.setUpdatedBy(ownerUser.getId());
+        GroupBillModel groupBillO = groupBillService.findById(id);
+        if (groupBillO == null) throw new ObjectNotFoundException(id, "group_bill");
 
-        groupBillService.save(groupBill);
+        GroupBillModel groupBillUpdated = groupBillService.update(groupBillO, new UpdateGroupBillDto(apiGroupBillRequestDto, id), userModel);
 
-        var groupBillResponse = new GroupBillResponseRecordDto(groupBill);
+        return ResponseEntity.status(HttpStatus.OK).body(new GroupBillResponseDto(groupBillUpdated));
+    }
 
-        return ResponseEntity.status(HttpStatus.OK).body(groupBillResponse);
+    @PostMapping("/{groupBillId}/customer/{customerId}")
+    public ResponseEntity<Void> addCustomer(@PathVariable(value = "groupBillId") UUID groupBillId, @PathVariable(value = "customerId") UUID customerId) {
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
+
+        GroupBillModel groupBill = groupBillService.findByIdAndUser(groupBillId, userModel);
+        if (groupBill == null) throw new ObjectNotFoundException(groupBillId, "group_bill");
+
+        CustomerModel customer = customerService.findByIdAndUser(customerId, userModel);
+        if (customer == null) throw new ObjectNotFoundException(customerId, "customer");
+
+        if(groupBill.getCustomers().contains(customer)) throw new BusinessException("Cliente já está no grupo");
+
+        groupBillService.addCustomer(groupBill, customer);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{groupBillId}/customer")
+    public ResponseEntity<List<CustomerResponseDto>> getAllCustomers(@PageableDefault(sort = "dueDate", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable(value = "groupBillId") UUID groupBillId) {
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
+
+        var groupBill = groupBillService.findById(groupBillId);
+        if(groupBill == null) throw new ObjectNotFoundException(groupBillId, "group_bill");
+
+        List<CustomerResponseDto> pageResponse = groupBill.getCustomers().stream().map(CustomerResponseDto::new).toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteGroupBill(@PathVariable(value="id") UUID id){
-        Optional<GroupBillModel> groupBillO = groupBillService.findById(id);
-        if(groupBillO.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        groupBillService.delete(groupBillO.get());
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Void> delete(@PathVariable(value = "id") UUID id, Authentication authentication) {
+        UserModel userModel = (UserModel) authentication.getPrincipal();
+        if (userModel == null) throw new UnauthorizedException();
+
+        GroupBillModel groupBillO = groupBillService.findByIdAndUser(id, userModel);
+        if (groupBillO == null) throw new ObjectNotFoundException(id, "group_bill");
+
+        groupBillService.delete(groupBillO);
+        return ResponseEntity.noContent().build();
     }
 
 }
