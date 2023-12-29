@@ -1,21 +1,19 @@
 package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.CustomerModel;
-import com.jm.jamesapp.models.TransactionModel;
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.models.dto.SaveCustomerDto;
 import com.jm.jamesapp.models.dto.UpdateCustomerDto;
 import com.jm.jamesapp.repositories.CustomerRepository;
 import com.jm.jamesapp.services.exceptions.BusinessException;
-import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
+import com.jm.jamesapp.services.interfaces.ITransactionService;
 import com.jm.jamesapp.utils.constraints.CpfOrCnpjValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Set;
 import java.util.UUID;
 
 import static com.jm.jamesapp.utils.constraints.CpfOrCnpjValidator.cleanStringValue;
@@ -46,7 +44,6 @@ public class CustomerService implements ICustomerService {
 
         customer.setName(saveCustomerDto.getName());
         customer.setCpfCnpj(cleanStringValue(saveCustomerDto.getCpfCnpj()));
-        customer.setUpdatedBy(userModel.getId());
 
         return customerRepository.save(customer);
     }
@@ -57,13 +54,21 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
+    // TODO: mas se o guerreiro quiser excluir mesmo assim?
+    // TODO: transactionService.calculateCustomerBalance(customerModel) ... valida se tem saldo
     public void delete(CustomerModel customerModel) {
-//        double balanceFromCustomer = transactionService.getBalanceFromCustomer(customerModel);
-//        if (balanceFromCustomer > 0) throw new BusinessException("Cliente possui saldo pendente");
-        // TODO: mas se o guerreiro quiser excluir mesmo assim?
-        // TODO: transactionService.calculateCustomerBalance(customerModel) ... valida se tem saldo
+        BigDecimal balanceFromCustomer = calculateBalance(customerModel);
+        if (balanceFromCustomer.compareTo(BigDecimal.ZERO) > 0) throw new BusinessException("Cliente possui saldo pendente");
 
         customerRepository.delete(customerModel);
+    }
+
+    public BigDecimal calculateBalance(CustomerModel customerModel) {
+        return customerRepository.sumTransactionsByCustomer(customerModel);
+    }
+
+    public void deleteWithPendingBalance(CustomerModel customer){
+        customerRepository.delete(customer);
     }
 
     @Override
@@ -79,21 +84,6 @@ public class CustomerService implements ICustomerService {
     @Override
     public CustomerModel findByCpfCnpjAndUser(String cpfCnpj, UserModel userModel) {
         return customerRepository.findByCpfCnpjAndUser(CpfOrCnpjValidator.cleanStringValue(cpfCnpj), userModel).orElse(null);
-    }
-
-    @Override
-    public BigDecimal calculateBalance(UUID id, UserModel userModel) {
-        CustomerModel customerModel = findById(id);
-        if (customerModel == null) throw new ObjectNotFoundException(id, "customer");
-
-        Set<TransactionModel> transactions = customerModel.getTransactions();
-        BigDecimal balance = BigDecimal.ZERO;
-        for (TransactionModel transaction : transactions) {
-            if (transaction.getStatus() != TransactionModel.StatusTransaction.CANCELED) {
-                balance = balance.add(transaction.getAmount());
-            }
-        }
-        return balance;
     }
 
     private void validateSave(SaveCustomerDto customerModel, UserModel userModel) {

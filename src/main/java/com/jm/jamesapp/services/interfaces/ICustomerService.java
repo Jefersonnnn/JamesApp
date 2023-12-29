@@ -1,9 +1,9 @@
 package com.jm.jamesapp.services.interfaces;
 
-import com.jm.jamesapp.models.dto.SaveCustomerDto;
-import com.jm.jamesapp.models.dto.UpdateCustomerDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.dto.SaveCustomerDto;
+import com.jm.jamesapp.models.dto.UpdateCustomerDto;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +24,10 @@ public interface ICustomerService {
     CustomerModel findById(UUID id);
 
     @Transactional
-    void delete(CustomerModel customerModel);
+    void delete(CustomerModel customer);
+
+    @Transactional
+    void deleteWithPendingBalance(CustomerModel customer);
 
     @Nullable
     CustomerModel findByIdAndUser(UUID id, UserModel userModel);
@@ -34,5 +37,5 @@ public interface ICustomerService {
     @Nullable
     CustomerModel findByCpfCnpjAndUser(String cpfCnpj, UserModel userModel);
 
-    BigDecimal calculateBalance(UUID id, UserModel userModel);
+    BigDecimal calculateBalance(CustomerModel customerModel);
 }

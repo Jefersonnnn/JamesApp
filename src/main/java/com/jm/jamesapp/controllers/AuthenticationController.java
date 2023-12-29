@@ -1,33 +1,30 @@
 package com.jm.jamesapp.controllers;
 
-import com.jm.jamesapp.dtos.requests.AuthenticationRequestDto;
 import com.jm.jamesapp.dtos.requests.ApiUserRequestDto;
+import com.jm.jamesapp.dtos.requests.AuthenticationRequestDto;
 import com.jm.jamesapp.dtos.responses.AuthenticationResponseDto;
 import com.jm.jamesapp.dtos.responses.UserResponseDto;
 import com.jm.jamesapp.models.UserModel;
 import com.jm.jamesapp.models.dto.SaveUserDto;
 import com.jm.jamesapp.security.TokenService;
 import com.jm.jamesapp.services.UserService;
+import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("auth")
 public class AuthenticationController {
 
     private final AuthenticationManager authenticationManager;
 
-    private final UserService userService;
+    private final IUserService userService;
 
     private final TokenService tokenService;
 

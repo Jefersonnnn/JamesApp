@@ -2,18 +2,14 @@ package com.jm.jamesapp.controllers;
 
 
 import com.jm.jamesapp.dtos.requests.ApiUpdateUserRequestDto;
-import com.jm.jamesapp.dtos.requests.ApiUserRequestDto;
 import com.jm.jamesapp.dtos.responses.UserResponseDto;
 import com.jm.jamesapp.models.UserModel;
-import com.jm.jamesapp.models.dto.SaveUserDto;
 import com.jm.jamesapp.models.dto.UpdateUserDto;
 import com.jm.jamesapp.security.IAuthenticationFacade;
 import com.jm.jamesapp.security.exceptions.UnauthorizedException;
 import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,14 +34,14 @@ public class UserController {
         this.authenticationFacade = authenticationFacade;
     }
 
-    @PostMapping
-    public ResponseEntity<UserResponseDto> save(@RequestBody @Valid ApiUserRequestDto apiUserRequestDto) {
-        if(this.userService.findByUsername(apiUserRequestDto.username()) != null) throw new DataIntegrityViolationException("Username already exists");
-        if(this.userService.findByEmail(apiUserRequestDto.email()) != null) throw new DataIntegrityViolationException("E-mail already exists");
-
-        var userSaved = userService.save(new SaveUserDto(apiUserRequestDto));
-        return ResponseEntity.status(HttpStatus.CREATED).body(new UserResponseDto(userSaved));
-    }
+//    @PostMapping
+//    public ResponseEntity<UserResponseDto> save(@RequestBody @Valid ApiUserRequestDto apiUserRequestDto) {
+//        if(this.userService.findByUsername(apiUserRequestDto.username()) != null) throw new DataIntegrityViolationException("Username already exists");
+//        if(this.userService.findByEmail(apiUserRequestDto.email()) != null) throw new DataIntegrityViolationException("E-mail already exists");
+//
+//        var userSaved = userService.save(new SaveUserDto(apiUserRequestDto));
+//        return ResponseEntity.status(HttpStatus.CREATED).body(new UserResponseDto(userSaved));
+//    }
 
     @GetMapping
     public ResponseEntity<Page<UserResponseDto>> getAll(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
@@ -109,6 +105,7 @@ public class UserController {
         UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
+        //Todo: Tirar IF criar nova rota admin
         UserModel userToDelete = null;
         if(userModel.getRole() == UserModel.UserRole.ADMIN){
             userToDelete = userService.findById(id);

@@ -15,9 +15,7 @@ import java.util.UUID;
 @Repository
 public interface TransactionRepository extends JpaRepository<TransactionModel, UUID> {
     Page<TransactionModel> findAllByUser(Pageable pageable, UserModel userModel);
-    Page<TransactionModel> findAllByCustomer(Pageable pageable, CustomerModel customerModel);
-    List<TransactionModel> findAllByCustomer(CustomerModel customerModel);
+    Page<TransactionModel> findAllByCustomerAndUser(Pageable pageable, CustomerModel customerModel, UserModel userModel);
+    List<TransactionModel> findAllByCustomerAndUser(CustomerModel customerModel, UserModel userModel);
     Optional<TransactionModel> findByIdAndUser(UUID id, UserModel userModel);
-
-
 }

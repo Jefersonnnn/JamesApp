@@ -7,6 +7,7 @@ import com.jm.jamesapp.models.dto.SaveGroupBillDto;
 import com.jm.jamesapp.models.dto.UpdateGroupBillDto;
 import com.jm.jamesapp.repositories.GroupBillRepository;
 import com.jm.jamesapp.services.exceptions.BusinessException;
+import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.IGroupBillService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @Service
 public class GroupBillService implements IGroupBillService {
 
-    final GroupBillRepository groupBillRepository;
+    private final GroupBillRepository groupBillRepository;
 
     public GroupBillService(GroupBillRepository groupBillRepository) {
         this.groupBillRepository = groupBillRepository;

@@ -1,5 +1,6 @@
 package com.jm.jamesapp.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serial;
@@ -14,6 +15,8 @@ import java.util.Set;
 public class CustomerModel extends BaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+
+    @JsonIgnore
     @ManyToOne
     private UserModel user;
     @Column(nullable = false)
@@ -21,16 +24,12 @@ public class CustomerModel extends BaseModel implements Serializable {
     @Column(nullable = false, length = 14)
     private String cpfCnpj;
 
-    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
-    //Todo: Como arrumar o erro: Hibernate could not initialize proxy – no Session
+    @JsonIgnore
+    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
     private Set<TransactionModel> transactions = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "TB_CUSTOMERS_GROUPBILLS",
-            joinColumns = @JoinColumn(name = "customer_id"),
-            inverseJoinColumns = @JoinColumn(name = "groupbill_id")
-    )
+    @JsonIgnore
+    @ManyToMany(mappedBy = "customers")
     private Set<GroupBillModel> groupBills = new HashSet<>();
 
     public CustomerModel() {}

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -31,8 +32,13 @@ public class GroupBillModel extends BaseModel implements Serializable {
 
     private String description;
 
-    @ManyToMany(mappedBy = "groupBills")
-    private Set<CustomerModel> customers;
+    @ManyToMany
+    @JoinTable(
+            name = "tb_groupbill_customers",
+            joinColumns = @JoinColumn(name = "groupbill_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id")
+    )
+    private Set<CustomerModel> customers = new HashSet<>();
 
     public enum BillingFrequency {
         DAILY("Daily"),

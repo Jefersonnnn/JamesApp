@@ -35,7 +35,7 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     @OneToMany(mappedBy = "user")
     private List<GroupBillModel> groupBills;
 
-    @Enumerated(value = EnumType.STRING) //TODO: Definir para todo Enum ter essa annotation por default no sistema
+    @Enumerated(value = EnumType.STRING)
     private UserRole role;
 
     public UserModel(){}
@@ -136,8 +136,7 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
 
     @Override
     public boolean isEnabled() {
-        // Todo: Melhorar depois
-        return true;
+        return !this.isDeleted();
     }
 
     @Override

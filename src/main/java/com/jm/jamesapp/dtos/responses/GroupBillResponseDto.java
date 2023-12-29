@@ -11,13 +11,15 @@ public record GroupBillResponseDto(
         UUID ownerId,
         String name,
         BigDecimal totalPayment,
-        String description
+        String description,
+        GroupBillModel.BillingFrequency billingFrequency
 ) {
     public GroupBillResponseDto(GroupBillModel groupBillModel) {
         this(groupBillModel.getId(),
                 groupBillModel.getUser().getId(),
                 groupBillModel.getName(),
                 groupBillModel.getTotalPayment(),
-                groupBillModel.getDescription());
+                groupBillModel.getDescription(),
+                groupBillModel.getBillingFrequency());
     }
 }

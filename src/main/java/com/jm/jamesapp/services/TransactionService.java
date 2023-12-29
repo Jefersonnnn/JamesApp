@@ -7,6 +7,8 @@ import com.jm.jamesapp.models.dto.SaveTransactionDto;
 import com.jm.jamesapp.models.dto.UpdateTransactionDto;
 import com.jm.jamesapp.repositories.TransactionRepository;
 import com.jm.jamesapp.services.exceptions.BusinessException;
+import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
+import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.ITransactionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,9 +23,9 @@ public class TransactionService implements ITransactionService {
 
     final TransactionRepository transactionRepository;
 
-    final CustomerService customerService;
+    final ICustomerService customerService;
 
-    public TransactionService(TransactionRepository transactionRepository, CustomerService customerService) {
+    public TransactionService(TransactionRepository transactionRepository, ICustomerService customerService) {
         this.transactionRepository = transactionRepository;
         this.customerService = customerService;
     }
@@ -34,15 +36,15 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public TransactionModel register(SaveTransactionDto saveTransactionDto, UserModel userModel) {
-        validateSaveTransaction(saveTransactionDto, userModel);
+    public TransactionModel register(SaveTransactionDto saveTransactionDto) {
+        validateSaveTransaction(saveTransactionDto);
 
         TransactionModel transaction = new TransactionModel();
-        CustomerModel customer = customerService.findByCpfCnpjAndUser(saveTransactionDto.getCustomerCpfCnpj(), userModel);
+        CustomerModel customer = saveTransactionDto.getSender();
         if (customer == null) return null;
 
         transaction.setCustomer(customer);
-        transaction.setUser(userModel);
+        transaction.setUser(saveTransactionDto.getSender().getUser());
 
         transaction.setDueDate(saveTransactionDto.getDueDate());
         transaction.setAmount(saveTransactionDto.getAmount());
@@ -65,7 +67,7 @@ public class TransactionService implements ITransactionService {
     public TransactionModel update(TransactionModel transaction, UpdateTransactionDto updateTransactionDto, UserModel userModel) {
         // todo: Faz sentido alterar uma transação?
         // Não poderia quebrar todas as posteriores caso pegar uma antiga.
-        validateUpdateTransaction(updateTransactionDto, userModel);
+        validateUpdateTransaction(updateTransactionDto);
         return transactionRepository.save(transaction);
     }
 
@@ -75,13 +77,13 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public Page<TransactionModel> findAllByCustomer(Pageable pageable, CustomerModel customerModel) {
-        return transactionRepository.findAllByCustomer(pageable, customerModel);
+    public Page<TransactionModel> findAllByCustomerAndUser(Pageable pageable, CustomerModel customer, UserModel user) {
+        return transactionRepository.findAllByCustomerAndUser(pageable, customer, user);
     }
 
     @Override
-    public List<TransactionModel> findAllByCustomer(CustomerModel customerModel) {
-        return transactionRepository.findAllByCustomer(customerModel);
+    public List<TransactionModel> findAllByCustomerAndUser(CustomerModel customer, UserModel user) {
+        return transactionRepository.findAllByCustomerAndUser(customer, user);
     }
 
     @Override
@@ -97,31 +99,35 @@ public class TransactionService implements ITransactionService {
     @Override
     public void cancel(TransactionModel transactionModel, UserModel userModel) {
         transactionModel.setStatus(TransactionModel.StatusTransaction.CANCELED);
-        transactionModel.setUpdatedBy(userModel.getId());
         transactionRepository.save(transactionModel);
     }
 
-    private void validateSaveTransaction(SaveTransactionDto saveTransactionDto, UserModel userModel) {
+    private void validateSaveTransaction(SaveTransactionDto saveTransactionDto){
+        var customerSender = saveTransactionDto.getSender();
+        var user = saveTransactionDto.getSender().getUser();
+
+        boolean isCustomerAlreadyTransaction = customerService.findByIdAndUser(customerSender.getId(), user) != null;
+        if (!isCustomerAlreadyTransaction) throw new ObjectNotFoundException(customerSender.getId(), "customer");
+
         validateAmountTransaction(saveTransactionDto.getAmount());
-
-        CustomerModel customer = customerService.findByCpfCnpjAndUser(saveTransactionDto.getCustomerCpfCnpj(), userModel);
-        if (customer == null) throw new BusinessException("Você não possui um cliente cadastrado com o CPF/CNPJ informado.");
-
-        validateDebitTransaction(saveTransactionDto.getAmount(), customer.getId(), userModel);
+        validateDebitTransaction(saveTransactionDto.getAmount(), saveTransactionDto.getSender());
     }
 
-    private void validateUpdateTransaction(UpdateTransactionDto updateTransactionDto, UserModel userModel){
+    private void validateUpdateTransaction(UpdateTransactionDto updateTransactionDto){
+        var customerSender = updateTransactionDto.getSender();
+        var user = updateTransactionDto.getSender().getUser();
+
+        boolean isCustomerAlreadyTransaction = customerService.findByIdAndUser(customerSender.getId(), user) != null;
+        if (!isCustomerAlreadyTransaction) throw new ObjectNotFoundException(customerSender.getId(), "customer");
+
         validateAmountTransaction(updateTransactionDto.getAmount());
-        CustomerModel customer = customerService.findByCpfCnpjAndUser(updateTransactionDto.getCustomerCpfCnpj(), userModel);
-        if (customer == null) throw new BusinessException("Você não possui um cliente cadastrado com o CPF/CNPJ informado.");
-
-        validateDebitTransaction(updateTransactionDto.getAmount(), customer.getId(), userModel);
+        validateDebitTransaction(updateTransactionDto.getAmount(), updateTransactionDto.getSender());
     }
 
-    private void validateDebitTransaction(BigDecimal transactionAmount, UUID customerId, UserModel userModel){
+    private void validateDebitTransaction(BigDecimal transactionAmount, CustomerModel customer){
         if(transactionAmount.compareTo(BigDecimal.ZERO) < 0){
             transactionAmount = transactionAmount.abs();
-            BigDecimal balance = customerService.calculateBalance(customerId, userModel);
+            BigDecimal balance = customerService.calculateBalance(customer);
             if(balance.compareTo(transactionAmount) < 0){
                 throw new BusinessException("Saldo insuficiente para realizar a transação de débito.");
             }

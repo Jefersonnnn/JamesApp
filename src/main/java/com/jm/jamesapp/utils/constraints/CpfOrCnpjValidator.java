@@ -64,8 +64,7 @@ public class CpfOrCnpjValidator implements ConstraintValidator<ValidCpfOrCnpj, S
     private boolean validateCnpj(String cnpj) {
         if (cnpj == null) return false;
         if (cnpj.startsWith("00000000000000")) return false;
-        if (cnpj.substring(0, 1).equals(""))
-            return false; //TODO:TESTAR SE PRECISA | Vai quebrar se receber uma string vazia
+        if (cnpj.substring(0, 1).isEmpty()) return false;
 
         int iSoma = 0, iDigito;
         char[] chCaracteresCNPJ;

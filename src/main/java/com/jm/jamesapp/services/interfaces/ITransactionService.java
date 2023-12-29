@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,16 +20,16 @@ public interface ITransactionService {
     Page<TransactionModel> findAllByUser(Pageable pageable, UserModel userModel);
 
     @Transactional
-    TransactionModel register(SaveTransactionDto saveTransactionDto, UserModel userModel);
+    TransactionModel register(SaveTransactionDto saveTransactionDto);
 
     @Transactional
     TransactionModel update(TransactionModel transaction, UpdateTransactionDto updateTransactionDto, UserModel userModel);
 
     Page<TransactionModel> findAll(Pageable pageable);
 
-    Page<TransactionModel> findAllByCustomer(Pageable pageable, CustomerModel customerModel);
+    Page<TransactionModel> findAllByCustomerAndUser(Pageable pageable, CustomerModel customer, UserModel user);
 
-    List<TransactionModel> findAllByCustomer(CustomerModel customerModel);
+    List<TransactionModel> findAllByCustomerAndUser(CustomerModel customer, UserModel user);
 
     @Transactional
     void delete(TransactionModel transactionModel);
@@ -38,4 +39,5 @@ public interface ITransactionService {
 
     @Nullable
     TransactionModel findByIdAndUser(UUID id, UserModel ownerUser);
+
 }
