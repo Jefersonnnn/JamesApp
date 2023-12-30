@@ -2,10 +2,9 @@ package com.jm.jamesapp.services.interfaces;
 
 
 import com.jm.jamesapp.models.CustomerModel;
-import com.jm.jamesapp.models.TransactionModel;
+import com.jm.jamesapp.models.transaction.TransactionModel;
 import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.dto.SaveTransactionDto;
-import com.jm.jamesapp.models.dto.UpdateTransactionDto;
 import jakarta.annotation.Nullable;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -19,22 +18,11 @@ public interface ITransactionService {
     Page<TransactionModel> findAllByUser(Pageable pageable, UserModel userModel);
 
     @Transactional
-    TransactionModel register(SaveTransactionDto saveTransactionDto);
-
-    @Transactional
-    TransactionModel update(TransactionModel transaction, UpdateTransactionDto updateTransactionDto, UserModel userModel);
+    TransactionModel register(CustomerModel customer, SaveTransactionDto saveTransactionDto);
 
     Page<TransactionModel> findAll(Pageable pageable);
 
     Page<TransactionModel> findAllByCustomerAndUser(Pageable pageable, CustomerModel customer, UserModel user);
-
-    List<TransactionModel> findAllByCustomerAndUser(CustomerModel customer, UserModel user);
-
-    @Transactional
-    void delete(TransactionModel transactionModel);
-
-    @Transactional
-    void cancel(TransactionModel transactionModel, UserModel userModel);
 
     @Nullable
     TransactionModel findByIdAndUser(UUID id, UserModel ownerUser);

@@ -1,15 +1,16 @@
 package com.jm.jamesapp.dtos.requests;
 
-import jakarta.validation.constraints.NotNull;
+import com.jm.jamesapp.models.transaction.enums.TransactionType;
 
 import java.math.BigDecimal;
 import java.util.Date;
-
+import java.util.UUID;
 
 public record ApiTransactionRequestDto(
-        Date dueDate,
+        UUID customerId,
+        Date paymentDate,
         String description,
-        @NotNull String customerCpfCnpj,
-        BigDecimal amount
+        BigDecimal amount,
+        TransactionType type
 
         ) {}

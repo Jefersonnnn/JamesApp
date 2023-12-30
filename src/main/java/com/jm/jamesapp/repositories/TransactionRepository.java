@@ -1,7 +1,7 @@
 package com.jm.jamesapp.repositories;
 
 import com.jm.jamesapp.models.CustomerModel;
-import com.jm.jamesapp.models.TransactionModel;
+import com.jm.jamesapp.models.transaction.TransactionModel;
 import com.jm.jamesapp.models.user.UserModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

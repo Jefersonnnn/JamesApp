@@ -2,7 +2,9 @@ package com.jm.jamesapp.controllers;
 
 import com.jm.jamesapp.dtos.requests.ApiCustomerRequestDto;
 import com.jm.jamesapp.dtos.responses.CustomerResponseDto;
+import com.jm.jamesapp.dtos.responses.TransactionResponseDto;
 import com.jm.jamesapp.models.CustomerModel;
+import com.jm.jamesapp.models.transaction.TransactionModel;
 import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.dto.SaveCustomerDto;
 import com.jm.jamesapp.models.dto.UpdateCustomerDto;
@@ -52,12 +54,15 @@ public class CustomerController {
 
     @GetMapping
     public ResponseEntity<Page<CustomerResponseDto>> getAll(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
-        var userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
         Page<CustomerModel> customersList = customerService.findAllByUser(pageable, userModel);
 
-        Page<CustomerResponseDto> pageResponse = customersList.map(CustomerResponseDto::new);
+        Page<CustomerResponseDto> pageResponse = customersList.map(model -> {
+            BigDecimal balance = customerService.calculateBalance(model);
+            return new CustomerResponseDto(model, balance);
+        });
 
         return ResponseEntity.status(HttpStatus.OK).body(pageResponse);
     }
@@ -70,7 +75,8 @@ public class CustomerController {
         CustomerModel customer = customerService.findByIdAndUser(id, userModel);
         if (customer == null) throw new ObjectNotFoundException(id, "customer");
 
-        return ResponseEntity.status(HttpStatus.OK).body(new CustomerResponseDto(customer));
+        BigDecimal balance = customerService.calculateBalance(customer);
+        return ResponseEntity.status(HttpStatus.OK).body(new CustomerResponseDto(customer, balance));
     }
 
     @PutMapping("/{id}")
@@ -84,11 +90,12 @@ public class CustomerController {
 
         CustomerModel updatedCustomer = customerService.update(customer, new UpdateCustomerDto(apiCustomerRequestDto), userModel);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new CustomerResponseDto(updatedCustomer));
+        BigDecimal balance = customerService.calculateBalance(customer);
+        return ResponseEntity.status(HttpStatus.OK).body(new CustomerResponseDto(updatedCustomer, balance));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable(value="id") UUID id){
+    public ResponseEntity<Void> delete(@PathVariable(value="id") UUID id) {
         var userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
@@ -100,18 +107,18 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/{id}/balance")
-    public ResponseEntity<CustomerResponseDto> balance(@PathVariable(value="id") UUID id){
-        var userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+    @GetMapping("/{customerId}/transactions")
+    public ResponseEntity<Page<TransactionResponseDto>> listTransactions(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, @PathVariable(value = "customerId") UUID customerId) {
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
-        CustomerModel customer = customerService.findByIdAndUser(id, userModel);
-        if (customer == null) throw new ObjectNotFoundException(id, "customer");
+        CustomerModel customer = customerService.findByIdAndUser(customerId, userModel);
+        if (customer == null) throw new ObjectNotFoundException(customerId, "customer");
 
-        BigDecimal balance = customerService.calculateBalance(customer);
+        Page<TransactionModel> transactionList = transactionService.findAllByCustomerAndUser(pageable, customer, userModel);
 
-        if(balance == null) balance = BigDecimal.valueOf(0.0);
+        Page<TransactionResponseDto> responseList = transactionList.map(TransactionResponseDto::new);
 
-        return ResponseEntity.ok(new CustomerResponseDto(balance));
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 }
