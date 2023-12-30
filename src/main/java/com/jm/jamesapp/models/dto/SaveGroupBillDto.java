@@ -1,14 +1,14 @@
 package com.jm.jamesapp.models.dto;
 
 import com.jm.jamesapp.dtos.requests.ApiGroupBillRequestDto;
-import com.jm.jamesapp.models.GroupBillModel;
+import com.jm.jamesapp.models.billgroup.enums.BillingFrequency;
 
 import java.math.BigDecimal;
 
 public class SaveGroupBillDto {
     private String name;
     private BigDecimal totalPayment;
-    private GroupBillModel.BillingFrequency billingFrequency;
+    private BillingFrequency billingFrequency;
     private String description;
 
     public SaveGroupBillDto(ApiGroupBillRequestDto requestDto) {
@@ -34,11 +34,11 @@ public class SaveGroupBillDto {
         this.totalPayment = totalPayment;
     }
 
-    public GroupBillModel.BillingFrequency getBillingFrequency() {
+    public BillingFrequency getBillingFrequency() {
         return billingFrequency;
     }
 
-    public void setBillingFrequency(GroupBillModel.BillingFrequency billingFrequency) {
+    public void setBillingFrequency(BillingFrequency billingFrequency) {
         this.billingFrequency = billingFrequency;
     }
 

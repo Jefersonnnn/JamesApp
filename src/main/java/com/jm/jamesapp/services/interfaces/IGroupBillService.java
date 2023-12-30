@@ -1,7 +1,7 @@
 package com.jm.jamesapp.services.interfaces;
 
 import com.jm.jamesapp.models.CustomerModel;
-import com.jm.jamesapp.models.GroupBillModel;
+import com.jm.jamesapp.models.billgroup.BillGroupModel;
 import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.dto.SaveGroupBillDto;
 import com.jm.jamesapp.models.dto.UpdateGroupBillDto;
@@ -15,24 +15,24 @@ import java.util.UUID;
 public interface IGroupBillService{
 
     @Transactional
-    GroupBillModel save(SaveGroupBillDto saveGroupBillDto, UserModel userModel);
+    BillGroupModel save(SaveGroupBillDto saveGroupBillDto, UserModel userModel);
 
     @Transactional
-    GroupBillModel update(GroupBillModel groupBill, UpdateGroupBillDto updateGroupBillDto, UserModel userModel);
+    BillGroupModel update(BillGroupModel groupBill, UpdateGroupBillDto updateGroupBillDto, UserModel userModel);
 
-    Page<GroupBillModel> findAll(Pageable pageable);
+    Page<BillGroupModel> findAll(Pageable pageable);
 
     @Nullable
-    GroupBillModel findById(UUID id);
+    BillGroupModel findById(UUID id);
 
     @Transactional
-    void delete(GroupBillModel objModel);
+    void delete(BillGroupModel objModel);
 
-    Page<GroupBillModel> findAllByUser(Pageable pageable, UserModel userModel);
+    Page<BillGroupModel> findAllByUser(Pageable pageable, UserModel userModel);
 
     @Nullable
-    GroupBillModel findByIdAndUser(UUID id, UserModel userModel);
+    BillGroupModel findByIdAndUser(UUID id, UserModel userModel);
 
     @Transactional
-    void addCustomer(GroupBillModel groupBill, CustomerModel customer);
+    void addCustomer(BillGroupModel groupBill, CustomerModel customer);
 }
