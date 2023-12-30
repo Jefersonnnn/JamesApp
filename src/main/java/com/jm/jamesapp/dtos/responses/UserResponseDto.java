@@ -1,6 +1,6 @@
 package com.jm.jamesapp.dtos.responses;
 
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 
 import java.util.UUID;
 

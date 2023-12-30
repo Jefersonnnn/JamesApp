@@ -1,7 +1,7 @@
 package com.jm.jamesapp.repositories;
 
 import com.jm.jamesapp.models.CustomerModel;
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

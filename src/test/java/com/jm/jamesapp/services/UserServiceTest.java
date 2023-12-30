@@ -1,6 +1,6 @@
 package com.jm.jamesapp.services;
 
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.repositories.UserRepository;
 import com.jm.jamesapp.utils.constraints.enums.UserRole;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +47,7 @@ public class UserServiceTest {
     public void testCreateUser() {
         when(userRepository.save(user)).thenReturn(user);
 
-        UserModel createdUser = userService.save(user);
+        UserModel createdUser = userService.save(user, userModel);
 
         assertNotNull(createdUser.getId());
         assertEquals(user.getUsername(), createdUser.getUsername());

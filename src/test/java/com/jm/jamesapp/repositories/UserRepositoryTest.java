@@ -1,7 +1,7 @@
 package com.jm.jamesapp.repositories;
 
 import com.jm.jamesapp.dtos.requests.ApiUserRequestDto;
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

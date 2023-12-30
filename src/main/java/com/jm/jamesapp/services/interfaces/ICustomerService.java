@@ -1,7 +1,7 @@
 package com.jm.jamesapp.services.interfaces;
 
 import com.jm.jamesapp.models.CustomerModel;
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.dto.SaveCustomerDto;
 import com.jm.jamesapp.models.dto.UpdateCustomerDto;
 import jakarta.transaction.Transactional;

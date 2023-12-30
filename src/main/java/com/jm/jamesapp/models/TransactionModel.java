@@ -1,5 +1,6 @@
 package com.jm.jamesapp.models;
 
+import com.jm.jamesapp.models.user.UserModel;
 import jakarta.persistence.*;
 
 import java.io.Serial;

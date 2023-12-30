@@ -2,12 +2,11 @@ package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.GroupBillModel;
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.dto.SaveGroupBillDto;
 import com.jm.jamesapp.models.dto.UpdateGroupBillDto;
 import com.jm.jamesapp.repositories.GroupBillRepository;
 import com.jm.jamesapp.services.exceptions.BusinessException;
-import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.IGroupBillService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -3,8 +3,9 @@ package com.jm.jamesapp.controllers;
 
 import com.jm.jamesapp.dtos.requests.ApiUpdateUserRequestDto;
 import com.jm.jamesapp.dtos.responses.UserResponseDto;
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.dto.UpdateUserDto;
+import com.jm.jamesapp.models.user.enums.UserRole;
 import com.jm.jamesapp.security.IAuthenticationFacade;
 import com.jm.jamesapp.security.exceptions.UnauthorizedException;
 import com.jm.jamesapp.services.exceptions.ObjectNotFoundException;
@@ -87,7 +88,7 @@ public class UserController {
         if (userModel == null) throw new UnauthorizedException();
 
         UserModel userToUpdate = null;
-        if (userModel.getRole() == UserModel.UserRole.ADMIN){
+        if (userModel.getRole() == UserRole.ADMIN){
             userToUpdate = userService.findById(id);
         } else if (id == userModel.getId()){
             userToUpdate = userService.findById(id);
@@ -107,7 +108,7 @@ public class UserController {
 
         //Todo: Tirar IF criar nova rota admin
         UserModel userToDelete = null;
-        if(userModel.getRole() == UserModel.UserRole.ADMIN){
+        if(userModel.getRole() == UserRole.ADMIN){
             userToDelete = userService.findById(id);
         } else if (id == userModel.getId()){
             userToDelete = userService.findById(id);

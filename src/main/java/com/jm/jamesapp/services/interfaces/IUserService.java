@@ -1,6 +1,6 @@
 package com.jm.jamesapp.services.interfaces;
 
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.dto.SaveUserDto;
 import com.jm.jamesapp.models.dto.UpdateUserDto;
 import jakarta.transaction.Transactional;
@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface IUserService{
     @Transactional
-    UserModel save(SaveUserDto saveUserDto);
+    UserModel save(SaveUserDto saveUserDto, UserModel userModel);
 
     @Transactional
     UserModel update(UserModel objModel, UpdateUserDto updateUserDto);

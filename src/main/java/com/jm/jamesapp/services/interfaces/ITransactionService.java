@@ -3,7 +3,7 @@ package com.jm.jamesapp.services.interfaces;
 
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.TransactionModel;
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.dto.SaveTransactionDto;
 import com.jm.jamesapp.models.dto.UpdateTransactionDto;
 import jakarta.annotation.Nullable;
@@ -11,7 +11,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 

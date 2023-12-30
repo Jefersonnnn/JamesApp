@@ -2,7 +2,7 @@ package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.TransactionModel;
-import com.jm.jamesapp.models.UserModel;
+import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.dto.SaveTransactionDto;
 import com.jm.jamesapp.models.dto.UpdateTransactionDto;
 import com.jm.jamesapp.repositories.TransactionRepository;
