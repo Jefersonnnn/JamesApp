@@ -1,5 +1,8 @@
-package com.jm.jamesapp.models;
+package com.jm.jamesapp.models.billgroup;
 
+import com.jm.jamesapp.models.BaseModel;
+import com.jm.jamesapp.models.CustomerModel;
+import com.jm.jamesapp.models.billgroup.enums.BillingFrequency;
 import com.jm.jamesapp.models.user.UserModel;
 import jakarta.persistence.*;
 
@@ -9,10 +12,9 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
-
 @Entity
 @Table(name = "TB_GROUP_BILLS", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "user_id"})})
-public class GroupBillModel extends BaseModel implements Serializable {
+public class BillGroupModel extends BaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -23,7 +25,7 @@ public class GroupBillModel extends BaseModel implements Serializable {
     private UserModel user;
 
     @Column(nullable = false)
-    private BigDecimal totalPayment;
+    private BigDecimal value;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -39,22 +41,6 @@ public class GroupBillModel extends BaseModel implements Serializable {
     )
     private Set<CustomerModel> customers = new HashSet<>();
 
-    public enum BillingFrequency {
-        DAILY("Daily"),
-        MONTHLY("Monthly"),
-        ANNUALLY("Annually");
-
-        private final String label;
-
-        BillingFrequency(String label) {
-            this.label = label;
-        }
-
-        public String getLabel() {
-            return label;
-        }
-
-    }
 
     public Set<CustomerModel> getCustomers() {
         return customers;
@@ -76,12 +62,12 @@ public class GroupBillModel extends BaseModel implements Serializable {
         this.user = user;
     }
 
-    public BigDecimal getTotalPayment() {
-        return totalPayment;
+    public BigDecimal getValue() {
+        return value;
     }
 
-    public void setTotalPayment(BigDecimal totalPayment) {
-        this.totalPayment = totalPayment;
+    public void setValue(BigDecimal value) {
+        this.value = value;
     }
 
     public BillingFrequency getBillingFrequency() {

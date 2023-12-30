@@ -1,11 +1,11 @@
 package com.jm.jamesapp.configs;
 
 import com.jm.jamesapp.repositories.CustomerRepository;
-import com.jm.jamesapp.repositories.GroupBillRepository;
+import com.jm.jamesapp.repositories.BillGroupRepository;
 import com.jm.jamesapp.repositories.TransactionRepository;
 import com.jm.jamesapp.repositories.UserRepository;
 import com.jm.jamesapp.services.CustomerService;
-import com.jm.jamesapp.services.GroupBillService;
+import com.jm.jamesapp.services.BillGroupService;
 import com.jm.jamesapp.services.TransactionService;
 import com.jm.jamesapp.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +29,10 @@ public class DevConfig implements CommandLineRunner {
     private CustomerService customerService;
 
     @Autowired
-    private GroupBillRepository groupBillRepository;
+    private BillGroupRepository groupBillRepository;
 
     @Autowired
-    private GroupBillService groupBillService;
+    private BillGroupService groupBillService;
 
     @Autowired
     private TransactionRepository transactionRepository;

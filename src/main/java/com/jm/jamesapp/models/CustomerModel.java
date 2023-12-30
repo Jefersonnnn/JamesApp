@@ -1,6 +1,7 @@
 package com.jm.jamesapp.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jm.jamesapp.models.billgroup.BillGroupModel;
 import com.jm.jamesapp.models.transaction.TransactionModel;
 import com.jm.jamesapp.models.user.UserModel;
 import jakarta.persistence.*;
@@ -31,7 +32,7 @@ public class CustomerModel extends BaseModel implements Serializable {
 
     @JsonIgnore
     @ManyToMany(mappedBy = "customers")
-    private Set<GroupBillModel> groupBills = new HashSet<>();
+    private Set<BillGroupModel> billGroups = new HashSet<>();
 
     public CustomerModel() {}
 
@@ -41,8 +42,8 @@ public class CustomerModel extends BaseModel implements Serializable {
         this.cpfCnpj = cpfCnpj;
     }
 
-    public Set<GroupBillModel> getGroupBills() {
-        return groupBills;
+    public Set<BillGroupModel> getBillGroups() {
+        return billGroups;
     }
 
     public Set<TransactionModel> getTransactions() {

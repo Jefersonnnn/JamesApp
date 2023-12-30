@@ -3,7 +3,7 @@ package com.jm.jamesapp.models.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jm.jamesapp.models.BaseModel;
 import com.jm.jamesapp.models.CustomerModel;
-import com.jm.jamesapp.models.GroupBillModel;
+import com.jm.jamesapp.models.billgroup.BillGroupModel;
 import com.jm.jamesapp.models.user.enums.UserRole;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -36,7 +36,7 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
     private List<CustomerModel> customers;
 
     @OneToMany(mappedBy = "user")
-    private List<GroupBillModel> groupBills;
+    private List<BillGroupModel> groupBills;
 
     @Enumerated(value = EnumType.STRING)
     private UserRole role;
@@ -47,7 +47,7 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
         return customers;
     }
 
-    public List<GroupBillModel> getGroupBills() {
+    public List<BillGroupModel> getGroupBills() {
         return groupBills;
     }
 
