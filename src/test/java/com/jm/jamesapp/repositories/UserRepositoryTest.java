@@ -2,6 +2,7 @@ package com.jm.jamesapp.repositories;
 
 import com.jm.jamesapp.dtos.requests.ApiUserRequestDto;
 import com.jm.jamesapp.models.user.UserModel;
+import com.jm.jamesapp.models.user.enums.UserRole;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,10 +29,11 @@ class UserRepositoryTest {
     @DisplayName("Should get User successfully from DB")
     void findByIdSuccess(){
         ApiUserRequestDto data = new ApiUserRequestDto(
+                "James App",
                 "James",
                 "james.test@james.com.br",
                 "super-secret-password",
-                UserModel.UserRole.USER);
+                UserRole.USER);
         UserModel newUser = this.createUser(data);
 
         var uuid = newUser.getId();
@@ -54,7 +56,7 @@ class UserRepositoryTest {
     }
 
     private UserModel createUser(ApiUserRequestDto data){
-        UserModel newUser = new UserModel(data);
+        UserModel newUser = new UserModel(data.name(), data.username(), data.email(), data.password(), data.role());
         this.entityManager.persist(newUser);
         return newUser;
     }

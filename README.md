@@ -60,3 +60,6 @@ spring.datasource.password=sua_senha
 3. Execute a aplicação com o comando ./mvnw spring-boot:run (Maven Wrapper) 
 ou mvn spring-boot:run (se você tiver o Maven instalado).
 4. Acesse a API em http://localhost:8080.
+
+## Como Executar Testes
+1. Execute a aplicação com o comando `./mvnw test` ou `./mvnw test jacoco:report` (com coverage)

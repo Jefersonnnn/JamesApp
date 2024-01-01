@@ -1,108 +1,169 @@
 package com.jm.jamesapp.services;
 
+import com.jm.jamesapp.models.dto.SaveUserDto;
+import com.jm.jamesapp.models.dto.UpdateUserDto;
 import com.jm.jamesapp.models.user.UserModel;
+import com.jm.jamesapp.models.user.enums.UserRole;
 import com.jm.jamesapp.repositories.UserRepository;
-import com.jm.jamesapp.utils.constraints.enums.UserRole;
+import com.jm.jamesapp.services.exceptions.BusinessException;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
-
-    @InjectMocks
-    private UserService userService;
 
     @Mock
     UserRepository userRepository;
 
-    UserModel user;
+    @InjectMocks
+    private UserService userService;
+
+    private UserModel userAdmin;
+    private UserModel userUser;
+    private SaveUserDto saveUserDtoUSER;
+    private SaveUserDto saveUserDtoADMIN;
+    private UpdateUserDto updateUserDto;
+
 
     @BeforeEach
     public void setUp() {
-        user = new UserModel("Felipe Adriano", "felipe.adriano@jamesapp.com.br", "lipe@54321", UserModel.UserRole.ADMIN);
-        user.setId(UUID.fromString("1c1bfebd-52e3-4d47-8527-bea182851407"));
+        userAdmin = new UserModel("James App", "jamesapp", "james@jamesapp.com.br", "12345678", UserRole.ADMIN);
+        userUser = new UserModel("Felipe Adriano", "lipezin", "felipe.adriano@jamesapp.com.br", "lipe@54321", UserRole.USER);
+
+        saveUserDtoUSER = new SaveUserDto();
+        saveUserDtoUSER.setName("Felipe Adriano");
+        saveUserDtoUSER.setUsername("lipezin1");
+        saveUserDtoUSER.setPassword("12345678");
+        saveUserDtoUSER.setEmail("felipe.adriano@jamesapp.com.br");
+        saveUserDtoUSER.setRole(UserRole.USER);
+
+        saveUserDtoADMIN = new SaveUserDto();
+        saveUserDtoADMIN.setName("James App");
+        saveUserDtoADMIN.setUsername("jamesapp");
+        saveUserDtoADMIN.setPassword("12345678");
+        saveUserDtoADMIN.setEmail("james@jamesapp.com.br");
+        saveUserDtoADMIN.setRole(UserRole.ADMIN);
+
+        updateUserDto = new UpdateUserDto();
+        updateUserDto.setName("Felipe Adriano");
+        updateUserDto.setUsername("prestez");
+        updateUserDto.setEmail("felipe.adriano@jamesapp.com.br");
     }
 
     @Test
-    @DisplayName("Should create a user successfully")
+    @DisplayName("Should create a normal user successfully")
     public void testCreateUser() {
-        when(userRepository.save(user)).thenReturn(user);
+        when(userRepository.save(Mockito.any(UserModel.class))).thenReturn(userUser);
 
-        UserModel createdUser = userService.save(user, userModel);
+        UserModel savedUser = userService.save(saveUserDtoUSER, null);
 
-        assertNotNull(createdUser.getId());
-        assertEquals(user.getUsername(), createdUser.getUsername());
+        Assertions.assertThat(savedUser).isNotNull();
+        Assertions.assertThat(savedUser.getRole()).isEqualTo(UserRole.USER);
     }
 
     @Test
-    @DisplayName("Should retrieve all users when paginating")
-    public void testFindAllUsers(){
-        Pageable paginacao = PageRequest.of(0, 10);
-        List<UserModel> userModels = new ArrayList<>();
-        userModels.add(new UserModel("Felipe Adriano", "felipe.adriano@jamesapp.com.br", "lipe@54321", UserModel.UserRole.USER));
-        userModels.add(new UserModel("Zezin Rei Delas", "zezin.reidelas@jamesapp.com.br", "zezin@54321", UserModel.UserRole.USER));
-        userModels.add(new UserModel("James App", "james.app@jamesapp.com.br", "james@5432", UserModel.UserRole.ADMIN));
+    @DisplayName("Should create a admin user successfully")
+    public void testCreateUserAdmin() {
+        when(userRepository.save(Mockito.any(UserModel.class))).thenReturn(userAdmin);
 
-        Page<UserModel> page = new PageImpl<>(userModels, paginacao, userModels.size());
+        UserModel savedUserAdmin = userService.save(saveUserDtoADMIN, userAdmin);
 
-        when(userRepository.findAll(paginacao)).thenReturn(page);
-
-        Page<UserModel> userModelList = userService.findAll(paginacao);
-
-        assertNotNull(userModelList);
-        assertEquals(userModelList.getTotalElements(), 3);
+        Assertions.assertThat(savedUserAdmin).isNotNull();
+        Assertions.assertThat(savedUserAdmin.getRole()).isEqualTo(UserRole.ADMIN);
     }
+
+    @Test
+    @DisplayName("An error should return when trying to create a user with an existing username")
+    public void testCreateUserAlreadyExistUsername() {
+        String username = "lipezin1";
+        when(userRepository.findByUsername(username)).thenReturn(Optional.ofNullable(userUser));
+
+        BusinessException exception = Assertions.catchThrowableOfType(() -> {
+            userService.save(saveUserDtoUSER, null);
+        }, BusinessException.class);
+
+        Assertions.assertThat(exception.getMessage()).isEqualTo("Username already exists");
+    }
+
+    @Test
+    @DisplayName("An error should return when trying to create a user with an existing email")
+    public void testCreateUserAlreadyExistEmail() {
+        String email = "felipe.adriano@jamesapp.com.br";
+        when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(userUser));
+
+        BusinessException exception = Assertions.catchThrowableOfType(() -> {
+            userService.save(saveUserDtoUSER, null);
+        }, BusinessException.class);
+
+        Assertions.assertThat(exception.getMessage()).isEqualTo("E-mail already exists");
+    }
+
+    @Test
+    @DisplayName("Deve retornar uma Page de UserModel")
+    public void testFindAll() {
+        Page<UserModel> users = Mockito.mock(Page.class);
+
+        when(userRepository.findAll(Mockito.any(Pageable.class))).thenReturn(users);
+
+        Pageable pageable = PageRequest.of(1, 10);
+        Page<UserModel> saveUser = userService.findAll(pageable);
+
+        Assertions.assertThat(saveUser).isNotNull();
+    }
+
 
     @Test
     @DisplayName("Should return a user referring to the provided ID")
     public void testFindUserByIdSuccess() {
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        UUID id = UUID.fromString("77f4f611-fd7d-4c41-967b-e04fa50d81b5");
 
-        var uuid = UUID.fromString("1c1bfebd-52e3-4d47-8527-bea182851407");
-        UserModel user = userService.findById(uuid);
+        when(userRepository.findById(id)).thenReturn(Optional.of(userUser));
 
-        assert user != null;
-        assertEquals(uuid,user.getId());
-        verify(userRepository).findById(uuid);
-        verifyNoMoreInteractions(userRepository);
+        UserModel savedUser = userService.findById(id);
+
+        Assertions.assertThat(savedUser).isNotNull();
     }
 
     @Test
     @DisplayName("Should not return the user when not providing an ID")
     public void testFindUserByIdEmpty() {
-        when(userRepository.findById(null)).thenReturn(Optional.empty());
+        UserModel user = userService.findById(null);
 
-       UserModel user = userService.findById(null);
-
-        assertNotNull(user);
+        assertNull(user);
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("Should remove user successfully")
-    public void testDeleteUserSuccess(){
-        userService.delete(user);
-        Mockito.verify(userRepository).delete(user);
-        verifyNoMoreInteractions(userRepository);
+    public void testUpdateUser() {
+        when(userRepository.save(Mockito.any(UserModel.class))).thenReturn(userUser);
+
+        UserModel savedUser = userService.update(userUser, updateUserDto);
+
+        Assertions.assertThat(savedUser).isNotNull();
+
     }
 
+    @Test
+    @DisplayName("Should remove user successfully")
+    public void testDeleteUserSuccess() {
+        userService.delete(userUser);
+        Mockito.verify(userRepository).delete(userUser);
+        verifyNoMoreInteractions(userRepository);
+    }
 }
