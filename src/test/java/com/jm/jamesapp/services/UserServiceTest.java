@@ -5,6 +5,7 @@ import com.jm.jamesapp.models.dto.UpdateUserDto;
 import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.user.enums.UserRole;
 import com.jm.jamesapp.repositories.UserRepository;
+import com.jm.jamesapp.services.exceptions.BusinessException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,21 +34,31 @@ public class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    private UserModel user;
-    private SaveUserDto saveUserDto;
+    private UserModel userAdmin;
+    private UserModel userUser;
+    private SaveUserDto saveUserDtoUSER;
+    private SaveUserDto saveUserDtoADMIN;
     private UpdateUserDto updateUserDto;
 
 
     @BeforeEach
     public void setUp() {
-        user = new UserModel("Felipe Adriano", "lipezin", "felipe.adriano@jamesapp.com.br", "lipe@54321", UserRole.ADMIN);
+        userAdmin = new UserModel("James App", "jamesapp", "james@jamesapp.com.br", "12345678", UserRole.ADMIN);
+        userUser = new UserModel("Felipe Adriano", "lipezin", "felipe.adriano@jamesapp.com.br", "lipe@54321", UserRole.USER);
 
-        saveUserDto = new SaveUserDto();
-        saveUserDto.setName("Felipe Adriano");
-        saveUserDto.setUsername("lipezin1");
-        saveUserDto.setPassword("12345678");
-        saveUserDto.setEmail("felipe.adriano@jamesapp.com.br");
-        saveUserDto.setRole(UserRole.USER);
+        saveUserDtoUSER = new SaveUserDto();
+        saveUserDtoUSER.setName("Felipe Adriano");
+        saveUserDtoUSER.setUsername("lipezin1");
+        saveUserDtoUSER.setPassword("12345678");
+        saveUserDtoUSER.setEmail("felipe.adriano@jamesapp.com.br");
+        saveUserDtoUSER.setRole(UserRole.USER);
+
+        saveUserDtoADMIN = new SaveUserDto();
+        saveUserDtoADMIN.setName("James App");
+        saveUserDtoADMIN.setUsername("jamesapp");
+        saveUserDtoADMIN.setPassword("12345678");
+        saveUserDtoADMIN.setEmail("james@jamesapp.com.br");
+        saveUserDtoADMIN.setRole(UserRole.ADMIN);
 
         updateUserDto = new UpdateUserDto();
         updateUserDto.setName("Felipe Adriano");
@@ -56,13 +67,51 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Should create a user successfully")
+    @DisplayName("Should create a normal user successfully")
     public void testCreateUser() {
-        when(userRepository.save(Mockito.any(UserModel.class))).thenReturn(user);
+        when(userRepository.save(Mockito.any(UserModel.class))).thenReturn(userUser);
 
-        UserModel savedUser = userService.save(saveUserDto, null);
+        UserModel savedUser = userService.save(saveUserDtoUSER, null);
 
         Assertions.assertThat(savedUser).isNotNull();
+        Assertions.assertThat(savedUser.getRole()).isEqualTo(UserRole.USER);
+    }
+
+    @Test
+    @DisplayName("Should create a admin user successfully")
+    public void testCreateUserAdmin() {
+        when(userRepository.save(Mockito.any(UserModel.class))).thenReturn(userAdmin);
+
+        UserModel savedUserAdmin = userService.save(saveUserDtoADMIN, userAdmin);
+
+        Assertions.assertThat(savedUserAdmin).isNotNull();
+        Assertions.assertThat(savedUserAdmin.getRole()).isEqualTo(UserRole.ADMIN);
+    }
+
+    @Test
+    @DisplayName("An error should return when trying to create a user with an existing username")
+    public void testCreateUserAlreadyExistUsername() {
+        String username = "lipezin1";
+        when(userRepository.findByUsername(username)).thenReturn(Optional.ofNullable(userUser));
+
+        BusinessException exception = Assertions.catchThrowableOfType(() -> {
+            userService.save(saveUserDtoUSER, null);
+        }, BusinessException.class);
+
+        Assertions.assertThat(exception.getMessage()).isEqualTo("Username already exists");
+    }
+
+    @Test
+    @DisplayName("An error should return when trying to create a user with an existing email")
+    public void testCreateUserAlreadyExistEmail() {
+        String email = "felipe.adriano@jamesapp.com.br";
+        when(userRepository.findByEmail(email)).thenReturn(Optional.ofNullable(userUser));
+
+        BusinessException exception = Assertions.catchThrowableOfType(() -> {
+            userService.save(saveUserDtoUSER, null);
+        }, BusinessException.class);
+
+        Assertions.assertThat(exception.getMessage()).isEqualTo("E-mail already exists");
     }
 
     @Test
@@ -84,7 +133,7 @@ public class UserServiceTest {
     public void testFindUserByIdSuccess() {
         UUID id = UUID.fromString("77f4f611-fd7d-4c41-967b-e04fa50d81b5");
 
-        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+        when(userRepository.findById(id)).thenReturn(Optional.of(userUser));
 
         UserModel savedUser = userService.findById(id);
 
@@ -102,9 +151,9 @@ public class UserServiceTest {
 
     @Test
     public void testUpdateUser() {
-        when(userRepository.save(Mockito.any(UserModel.class))).thenReturn(user);
+        when(userRepository.save(Mockito.any(UserModel.class))).thenReturn(userUser);
 
-        UserModel savedUser = userService.update(user, updateUserDto);
+        UserModel savedUser = userService.update(userUser, updateUserDto);
 
         Assertions.assertThat(savedUser).isNotNull();
 
@@ -113,9 +162,8 @@ public class UserServiceTest {
     @Test
     @DisplayName("Should remove user successfully")
     public void testDeleteUserSuccess() {
-        userService.delete(user);
-        Mockito.verify(userRepository).delete(user);
+        userService.delete(userUser);
+        Mockito.verify(userRepository).delete(userUser);
         verifyNoMoreInteractions(userRepository);
     }
-
 }

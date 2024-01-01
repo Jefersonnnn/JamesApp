@@ -3,12 +3,10 @@ package com.jm.jamesapp.services;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.dto.SaveCustomerDto;
 import com.jm.jamesapp.models.dto.UpdateCustomerDto;
-import com.jm.jamesapp.models.dto.UpdateUserDto;
 import com.jm.jamesapp.models.user.UserModel;
 import com.jm.jamesapp.models.user.enums.UserRole;
 import com.jm.jamesapp.repositories.CustomerRepository;
 import com.jm.jamesapp.services.exceptions.BusinessException;
-import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -107,6 +105,7 @@ public class CustomerServiceTest {
         BigDecimal balanceZero = BigDecimal.ZERO;
         when(customerRepository.sumTransactionsByCustomer(customer)).thenReturn(balanceZero);
         customerService.delete(customer);
+
         Mockito.verify(customerRepository).delete(customer);
         verifyNoMoreInteractions(customerRepository);
     }
