@@ -1,95 +1,128 @@
 package com.jm.jamesapp.services;
 
 import com.jm.jamesapp.models.CustomerModel;
+import com.jm.jamesapp.models.dto.SaveCustomerDto;
+import com.jm.jamesapp.models.dto.UpdateCustomerDto;
+import com.jm.jamesapp.models.dto.UpdateUserDto;
 import com.jm.jamesapp.models.user.UserModel;
+import com.jm.jamesapp.models.user.enums.UserRole;
+import com.jm.jamesapp.repositories.CustomerRepository;
+import com.jm.jamesapp.services.exceptions.BusinessException;
+import org.assertj.core.api.AbstractThrowableAssert;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlGroup;
 
-import java.util.Objects;
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 public class CustomerServiceTest {
 
-    @Autowired
+    @Mock
+    CustomerRepository customerRepository;
+    @InjectMocks
     private CustomerService customerService;
-    @Autowired
-    private UserService userService;
+    private CustomerModel customer;
+    private CustomerModel customerUpdt;
+    private SaveCustomerDto saveCustomerDto;
+    private UpdateCustomerDto updateCustomerDto;
+    private UserModel user;
+
+    @BeforeEach
+    public void init() {
+        user = new UserModel("Felipe Adriano", "lipezin", "felipe.adriano@jamesapp.com.br", "lipe@54321", UserRole.ADMIN);
+        customer = new CustomerModel(null, "James Customer", "05515519094");
+        customerUpdt = new CustomerModel(null, "James Customer Updated", "05515519094");
+
+        saveCustomerDto = new SaveCustomerDto();
+        saveCustomerDto.setName("James Customer");
+        saveCustomerDto.setCpfCnpj("055.155.190-94");
+
+        updateCustomerDto = new UpdateCustomerDto();
+        updateCustomerDto.setName("James Customer Updated");
+        updateCustomerDto.setCpfCnpj("055.155.190-94");
+
+    }
 
     @Test
-    @SqlGroup({
-            @Sql(value = "classpath:reset.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-            @Sql(value = "classpath:init/user-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    })
     public void testCreateCustomer() {
-        Optional<UserModel> userOwner = userService.findById(UUID.fromString("77f4f611-fd7d-4c41-967b-e04fa50d81b5"));
-        CustomerModel customer = new CustomerModel();
+        when(customerRepository.save(Mockito.any(CustomerModel.class))).thenReturn(customer);
 
-        customer.setOwner(userOwner.get());
-        customer.setName("James Test");
-        customer.setCpfCnpj("055.155.190-94");
+        CustomerModel createdCustomer = customerService.save(saveCustomerDto, null);
 
-        CustomerModel createdCustomer = customerService.save(customer);
-
-        assert Objects.nonNull(createdCustomer.getId());
-        assert Objects.equals(customer.getName(), createdCustomer.getName());
+        Assertions.assertThat(createdCustomer).isNotNull();
     }
 
+
     @Test
-    @SqlGroup({
-            @Sql(value = "classpath:reset.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-            @Sql(value = "classpath:init/user-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-            @Sql(value = "classpath:init/customer-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    })
-    public void testFindAllCustomers(){
+    public void testFindAllByCustomers() {
+        Page<CustomerModel> customers = Mockito.mock(Page.class);
+        when(customerRepository.findAllByUser(Mockito.any(Pageable.class), Mockito.any(UserModel.class))).thenReturn(customers);
+
         Pageable paginacao = PageRequest.of(0, 10);
-        Page<CustomerModel> customerModelList = customerService.findAllByUser(paginacao, new UserModel());
+        Page<CustomerModel> customerModelList = customerService.findAllByUser(paginacao, user);
 
-        assertNotNull(customerModelList);
-        assertEquals(customerModelList.getTotalElements(), 5);
+        Assertions.assertThat(customerModelList).isNotNull();
     }
 
     @Test
-    @SqlGroup({
-            @Sql(value = "classpath:reset.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-            @Sql(value = "classpath:init/user-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-            @Sql(value = "classpath:init/customer-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    })
     public void testFindCustomerById() {
         var uuid = UUID.fromString("c251d6ea-8e4b-4cc6-a52c-6a0a5251c0d2");
-        Optional<CustomerModel> customer = customerService.findById(uuid);
+        when(customerRepository.findById(uuid)).thenReturn(Optional.ofNullable(customer));
 
-        assert customer.isPresent();
-        assert uuid == customer.get().getId();
+        CustomerModel customer = customerService.findById(uuid);
+
+        Assertions.assertThat(customer).isNotNull();
 
     }
 
     @Test
-    @SqlGroup({
-            @Sql(value = "classpath:reset.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-            @Sql(value = "classpath:init/user-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-            @Sql(value = "classpath:init/customer-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    })
-    public void testDeleteCustomer(){
-        var uuid = UUID.fromString("3096d1ec-d6f5-4e13-8a35-1c9b8203c3a3");
-        Optional<CustomerModel> customer = customerService.findById(uuid);
-        assertNotNull(customer);
+    public void testUpdateCustomer() {
+        customer.setUser(user);
+        customerUpdt.setUser(user);
 
-        assert customer.isPresent();
-        customerService.delete(customer.get());
-        Optional<CustomerModel> deletedUser = customerService.findById(uuid);
-        assert(deletedUser.isEmpty());
+        when(customerRepository.save(Mockito.any(CustomerModel.class))).thenReturn(customerUpdt);
+
+        CustomerModel savedUser = customerService.update(customer, updateCustomerDto, user);
+
+        Assertions.assertThat(savedUser).isNotNull();
+
+    }
+
+    @Test
+    public void testDeleteCustomer() {
+        BigDecimal balanceZero = BigDecimal.ZERO;
+        when(customerRepository.sumTransactionsByCustomer(customer)).thenReturn(balanceZero);
+        customerService.delete(customer);
+        Mockito.verify(customerRepository).delete(customer);
+        verifyNoMoreInteractions(customerRepository);
+    }
+
+    @Test
+    @DisplayName("When trying to remove a customer with a balance, an error should return")
+    public void testDeleteCustomerWithBalancePositive() {
+        BigDecimal balance = BigDecimal.valueOf(1);
+        when(customerRepository.sumTransactionsByCustomer(customer)).thenReturn(balance);
+
+        BusinessException exception = Assertions.catchThrowableOfType(() -> {
+            customerService.delete(customer);
+        }, BusinessException.class);
+
+        Assertions.assertThat(exception.getMessage()).isEqualTo("Cliente possui saldo pendente");
+        verify(customerRepository).sumTransactionsByCustomer(customer);
+        verifyNoMoreInteractions(customerRepository);
     }
 }
