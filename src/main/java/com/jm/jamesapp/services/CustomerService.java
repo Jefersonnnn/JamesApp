@@ -38,11 +38,11 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
-    public CustomerModel update(CustomerModel customer, UpdateCustomerDto saveCustomerDto, UserModel userModel) {
-        validateUpdate(customer, saveCustomerDto, userModel);
+    public CustomerModel update(CustomerModel customer, UpdateCustomerDto updateCustomerDto, UserModel userModel) {
+        validateUpdate(customer, updateCustomerDto, userModel);
 
-        customer.setName(saveCustomerDto.getName());
-        customer.setCpfCnpj(cleanStringValue(saveCustomerDto.getCpfCnpj()));
+        customer.setName(updateCustomerDto.getName());
+        customer.setCpfCnpj(cleanStringValue(updateCustomerDto.getCpfCnpj()));
 
         return customerRepository.save(customer);
     }
@@ -53,8 +53,6 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
-    // TODO: mas se o guerreiro quiser excluir mesmo assim?
-    // TODO: transactionService.calculateCustomerBalance(customerModel) ... valida se tem saldo
     public void delete(CustomerModel customerModel) {
         BigDecimal balanceFromCustomer = calculateBalance(customerModel);
         if (balanceFromCustomer.compareTo(BigDecimal.ZERO) > 0) throw new BusinessException("Cliente possui saldo pendente");

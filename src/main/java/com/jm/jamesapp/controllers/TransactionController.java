@@ -42,7 +42,7 @@ public class TransactionController {
         UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
-        CustomerModel customer = customerService.findByIdAndUser(transactionRequestDto.customerId(), userModel);
+        CustomerModel customer = customerService.findByIdAndUser(UUID.fromString(transactionRequestDto.customerId()), userModel);
         if (customer == null) throw new ObjectNotFoundException(transactionRequestDto.customerId(), "customer");
 
         TransactionModel transaction = transactionService.register(customer, new SaveTransactionDto(transactionRequestDto));

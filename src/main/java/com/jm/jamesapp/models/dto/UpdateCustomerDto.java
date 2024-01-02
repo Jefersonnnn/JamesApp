@@ -6,6 +6,9 @@ public class UpdateCustomerDto {
     private String name;
     private String cpfCnpj;
 
+    public UpdateCustomerDto() {
+    }
+
     public UpdateCustomerDto(ApiCustomerRequestDto requestRecordDto) {
         this.name = requestRecordDto.name();
         this.cpfCnpj = requestRecordDto.cpfCnpj();

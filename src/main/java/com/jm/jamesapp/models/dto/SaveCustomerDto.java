@@ -6,6 +6,9 @@ public class SaveCustomerDto {
     private String name;
     private String cpfCnpj;
 
+    public SaveCustomerDto() {
+    }
+
     public SaveCustomerDto(ApiCustomerRequestDto requestRecordDto) {
         this.name = requestRecordDto.name();
         this.cpfCnpj = requestRecordDto.cpfCnpj();

@@ -6,8 +6,8 @@ import com.jm.jamesapp.dtos.responses.BillGroupResponseDto;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.billgroup.BillGroupModel;
 import com.jm.jamesapp.models.user.UserModel;
-import com.jm.jamesapp.models.dto.SaveGroupBillDto;
-import com.jm.jamesapp.models.dto.UpdateGroupBillDto;
+import com.jm.jamesapp.models.dto.SaveBillGroupDto;
+import com.jm.jamesapp.models.dto.UpdateBillGroupDto;
 import com.jm.jamesapp.security.IAuthenticationFacade;
 import com.jm.jamesapp.security.exceptions.UnauthorizedException;
 import com.jm.jamesapp.services.exceptions.BusinessException;
@@ -49,7 +49,7 @@ public class BillGroupController {
         UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
-        BillGroupModel groupBill = groupBillService.save(new SaveGroupBillDto(apiGroupBillRequestDto), userModel);
+        BillGroupModel groupBill = groupBillService.save(new SaveBillGroupDto(apiGroupBillRequestDto), userModel);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new BillGroupResponseDto(groupBill));
     }
@@ -72,7 +72,7 @@ public class BillGroupController {
         if (userModel == null) throw new UnauthorizedException();
 
         BillGroupModel groupBillO = groupBillService.findById(id);
-        if (groupBillO == null) throw new ObjectNotFoundException(id, "group_bill");
+        if (groupBillO == null) throw new ObjectNotFoundException(id, "bill_group");
 
         return ResponseEntity.status(HttpStatus.OK).body(new BillGroupResponseDto(groupBillO));
     }
@@ -84,9 +84,9 @@ public class BillGroupController {
         if (userModel == null) throw new UnauthorizedException();
 
         BillGroupModel groupBillO = groupBillService.findById(id);
-        if (groupBillO == null) throw new ObjectNotFoundException(id, "group_bill");
+        if (groupBillO == null) throw new ObjectNotFoundException(id, "bill_group");
 
-        BillGroupModel groupBillUpdated = groupBillService.update(groupBillO, new UpdateGroupBillDto(apiGroupBillRequestDto, id), userModel);
+        BillGroupModel groupBillUpdated = groupBillService.update(groupBillO, new UpdateBillGroupDto(apiGroupBillRequestDto, id), userModel);
 
         return ResponseEntity.status(HttpStatus.OK).body(new BillGroupResponseDto(groupBillUpdated));
     }
@@ -128,7 +128,7 @@ public class BillGroupController {
         if (userModel == null) throw new UnauthorizedException();
 
         BillGroupModel groupBillO = groupBillService.findByIdAndUser(id, userModel);
-        if (groupBillO == null) throw new ObjectNotFoundException(id, "group_bill");
+        if (groupBillO == null) throw new ObjectNotFoundException(id, "bill_group");
 
         groupBillService.delete(groupBillO);
         return ResponseEntity.noContent().build();

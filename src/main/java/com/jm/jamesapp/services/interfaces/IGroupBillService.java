@@ -3,8 +3,8 @@ package com.jm.jamesapp.services.interfaces;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.billgroup.BillGroupModel;
 import com.jm.jamesapp.models.user.UserModel;
-import com.jm.jamesapp.models.dto.SaveGroupBillDto;
-import com.jm.jamesapp.models.dto.UpdateGroupBillDto;
+import com.jm.jamesapp.models.dto.SaveBillGroupDto;
+import com.jm.jamesapp.models.dto.UpdateBillGroupDto;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,15 +15,18 @@ import java.util.UUID;
 public interface IGroupBillService{
 
     @Transactional
-    BillGroupModel save(SaveGroupBillDto saveGroupBillDto, UserModel userModel);
+    BillGroupModel save(SaveBillGroupDto saveBillGroupDto, UserModel userModel);
 
     @Transactional
-    BillGroupModel update(BillGroupModel groupBill, UpdateGroupBillDto updateGroupBillDto, UserModel userModel);
+    BillGroupModel update(BillGroupModel groupBill, UpdateBillGroupDto updateBillGroupDto, UserModel userModel);
 
     Page<BillGroupModel> findAll(Pageable pageable);
 
     @Nullable
     BillGroupModel findById(UUID id);
+
+    @Nullable
+    BillGroupModel findLastByUser(UserModel user);
 
     @Transactional
     void delete(BillGroupModel objModel);

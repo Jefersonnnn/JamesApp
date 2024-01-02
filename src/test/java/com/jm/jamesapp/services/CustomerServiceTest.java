@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 public class CustomerServiceTest {
 
     @Mock
-    CustomerRepository customerRepository;
+    private CustomerRepository customerRepository;
     @InjectMocks
     private CustomerService customerService;
     private CustomerModel customer;
@@ -52,7 +52,6 @@ public class CustomerServiceTest {
         updateCustomerDto = new UpdateCustomerDto();
         updateCustomerDto.setName("James Customer Updated");
         updateCustomerDto.setCpfCnpj("055.155.190-94");
-
     }
 
     @Test
@@ -88,6 +87,17 @@ public class CustomerServiceTest {
     }
 
     @Test
+    public void testFindCustomerByIdAndUser() {
+        var uuid = UUID.fromString("c251d6ea-8e4b-4cc6-a52c-6a0a5251c0d2");
+        when(customerRepository.findByIdAndUser(uuid, user)).thenReturn(Optional.ofNullable(customer));
+
+        CustomerModel customer = customerService.findByIdAndUser(uuid, user);
+
+        Assertions.assertThat(customer).isNotNull();
+
+    }
+
+    @Test
     public void testUpdateCustomer() {
         customer.setUser(user);
         customerUpdt.setUser(user);
@@ -111,6 +121,14 @@ public class CustomerServiceTest {
     }
 
     @Test
+    @DisplayName("Should remove a customer even with a positive balance")
+    public void testDeleteCustomerWithPendingBalance() {
+        customerService.deleteWithPendingBalance(customer);
+        Mockito.verify(customerRepository).delete(customer);
+        verifyNoMoreInteractions(customerRepository);
+    }
+
+    @Test
     @DisplayName("When trying to remove a customer with a balance, an error should return")
     public void testDeleteCustomerWithBalancePositive() {
         BigDecimal balance = BigDecimal.valueOf(1);
@@ -124,4 +142,4 @@ public class CustomerServiceTest {
         verify(customerRepository).sumTransactionsByCustomer(customer);
         verifyNoMoreInteractions(customerRepository);
     }
-}
+    }

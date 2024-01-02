@@ -4,18 +4,32 @@ import com.jm.jamesapp.dtos.requests.ApiGroupBillRequestDto;
 import com.jm.jamesapp.models.billgroup.enums.BillingFrequency;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
-public class SaveGroupBillDto {
+public class UpdateBillGroupDto {
+    private UUID id;
     private String name;
     private BigDecimal totalPayment;
     private BillingFrequency billingFrequency;
     private String description;
 
-    public SaveGroupBillDto(ApiGroupBillRequestDto requestDto) {
+    public UpdateBillGroupDto() {
+    }
+
+    public UpdateBillGroupDto(ApiGroupBillRequestDto requestDto, UUID id) {
+        this.id = id;
         this.name = requestDto.name();
         this.totalPayment = requestDto.totalPayment();
         this.billingFrequency = requestDto.billingFrequency();
         this.description = requestDto.description();
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getName() {

@@ -1,11 +1,11 @@
 package com.jm.jamesapp.configs;
 
-import com.jm.jamesapp.repositories.CustomerRepository;
 import com.jm.jamesapp.repositories.BillGroupRepository;
+import com.jm.jamesapp.repositories.CustomerRepository;
 import com.jm.jamesapp.repositories.TransactionRepository;
 import com.jm.jamesapp.repositories.UserRepository;
-import com.jm.jamesapp.services.CustomerService;
 import com.jm.jamesapp.services.BillGroupService;
+import com.jm.jamesapp.services.CustomerService;
 import com.jm.jamesapp.services.TransactionService;
 import com.jm.jamesapp.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,64 +42,72 @@ public class DevConfig implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-//        ApiUserRequestDto u1 = new ApiUserRequestDto("Jeferson Machado", "jefersonm", "jeferson.machado@jamesapp.com.br", "12345678", UserModel.UserRole.ADMIN);
-//        userService.save(new SaveUserDto(u1));
-
-
 //        try {
+////            transactionRepository.deleteAll();
+////            groupBillRepository.deleteAll();
+////            customerRepository.deleteAll();
+////            userRepository.deleteAll();
+//
+////            ApiUserRequestDto u1 = new ApiUserRequestDto("Jeferson Machado", "jefersonm", "jeferson.machado@jamesapp.com.br", "12345678", UserRole.ADMIN);
+////            UserModel user1 = userService.save(new SaveUserDto(u1), null);
+//            UserModel userAdmin = userService.findByUsername("jefersonm");
+//
+//            try {
+//                ApiUserRequestDto u2 = new ApiUserRequestDto("Douglas Giovanellas", "giova nellas", "doug.giova.nellas@jamesapp.com.br", "12345678", UserRole.ADMIN);
+//                UserModel user2 = userService.save(new SaveUserDto(u2), userAdmin);
+//            } catch (Exception e){
+//                System.out.println(e.getMessage());
+//            }
+//
+//            try {
+//                ApiUserRequestDto u3 = new ApiUserRequestDto("Felipe Prestes", "Felipe Prestes", "felipe.prestes@jamesapp.com.br", "12345678", UserRole.USER);
+//                UserModel user3 = userService.save(new SaveUserDto(u3), userAdmin);
+//            } catch (Exception e){
+//                System.out.println(e.getMessage());
+//            }
+//
+//            CustomerModel c1;
+//            try {
+//                ApiCustomerRequestDto customer1 = new ApiCustomerRequestDto("Jeferson Machado", "09256144913");
+//                c1 = customerService.save(new SaveCustomerDto(customer1), userAdmin);
+//            } catch (Exception e){
+//                c1 = customerService.findByCpfCnpjAndUser("09256144913", userAdmin);
+//                System.out.println(e.getMessage());
+//            }
+//
+//            CustomerModel c2;
+//            try {
+//                ApiCustomerRequestDto customer2 = new ApiCustomerRequestDto("Felipe Prestes", "10739970062");
+//                c2 = customerService.save(new SaveCustomerDto(customer2), userAdmin);
+//            } catch (Exception e){
+//                c2 = customerService.findByCpfCnpjAndUser("10739970062", userAdmin);
+//                System.out.println(e.getMessage());
+//            }
+//
+//            BillGroupModel g1;
+//            try {
+//                ApiGroupBillRequestDto group1 = new ApiGroupBillRequestDto("Suno Research", BigDecimal.valueOf(130.0), BillingFrequency.MONTHLY, "Grupo suno de apostas esportivas");
+//                g1 = groupBillService.save(new SaveGroupBillDto(group1), userAdmin);
+//            } catch (Exception e){
+//                g1 = groupBillService.findLastByUser(userAdmin);
+//            }
+//
+//            try {
+//                groupBillService.addCustomer(g1, c1);
+//                groupBillService.addCustomer(g1, c2);
+//            } catch (Exception e){
+//                System.out.println(e.getMessage());
+//            }
 //
 //
-//            transactionRepository.deleteAll();
-//            groupBillRepository.deleteAll();
-//            customerRepository.deleteAll();
-//            userRepository.deleteAll();
 //
-//            ApiUserRequestDto u1 = new ApiUserRequestDto("Jeferson Machado", "jefersonm", "jeferson.machado@jamesapp.com.br", "12345678", UserModel.UserRole.ADMIN);
-//            ApiUserRequestDto u2 = new ApiUserRequestDto("Douglas Giovanellas", "giova nellas", "doug.giova.nellas@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
-//            ApiUserRequestDto u3 = new ApiUserRequestDto("Felipe Prestes", "Felipe Prestes", "felipe.prestes@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
-//            ApiUserRequestDto u4 = new ApiUserRequestDto("José Raul", "rei delas", "jose.raqul.quadross@jamesapp.com.br", "12345678", UserModel.UserRole.USER);
+//            ApiTransactionRequestDto tran1 = new ApiTransactionRequestDto(c1.getId(), Instant.now(), "Pagamento aleatório", BigDecimal.valueOf(25), TransactionType.PAYMENT_RECEIVED);
+//            ApiTransactionRequestDto tran2 = new ApiTransactionRequestDto(c1.getId(), Instant.now(), "Pagamento aleatório", BigDecimal.valueOf(100), TransactionType.PAYMENT_RECEIVED);
+//            ApiTransactionRequestDto tran3 = new ApiTransactionRequestDto(c1.getId(), Instant.now(), "Pagamento aleatório", BigDecimal.valueOf(33), TransactionType.PAYMENT_RECEIVED);
 //
-//            UserModel user1 = userService.save(new SaveUserDto(u1));
-//            UserModel user2 = userService.save(new SaveUserDto(u2));
-//            UserModel user3 = userService.save(new SaveUserDto(u3));
-//            userService.save(new SaveUserDto(u4));
-//
-//            ApiCustomerRequestDto customer1 = new ApiCustomerRequestDto("Jeferson Machado", "09256144913");
-//            ApiCustomerRequestDto customer2 = new ApiCustomerRequestDto("Felipe Prestes", "10739970062");
-//            ApiCustomerRequestDto customer3 = new ApiCustomerRequestDto("Jeferson Machado", "09256144913");
-//            ApiCustomerRequestDto customer4 = new ApiCustomerRequestDto("Jeferson Machado", "09256144913");
-//
-//            customerService.save(new SaveCustomerDto(customer1), user1);
-//            customerService.save(new SaveCustomerDto(customer2), user1);
-//            customerService.save(new SaveCustomerDto(customer3), user2);
-//            customerService.save(new SaveCustomerDto(customer4), user3);
-//
-//            ApiGroupBillRequestDto group1 = new ApiGroupBillRequestDto("Suno Research", BigDecimal.valueOf(130.0), GroupBillModel.BillingFrequency.MONTHLY, "Grupo suno de apostas esportivas");
-//            groupBillService.save(new SaveGroupBillDto(group1), user2);
-//
-//            ApiTransactionRequestDto tran1 = new ApiTransactionRequestDto(Date.from(Instant.now()), "Pagamento aleatório", "09256144913", BigDecimal.valueOf(25));
-//            ApiTransactionRequestDto tran2 = new ApiTransactionRequestDto(Date.from(Instant.now()), "Pagamento aleatório", "09256144913", BigDecimal.valueOf(100));
-//            ApiTransactionRequestDto tran3 = new ApiTransactionRequestDto(Date.from(Instant.now()), "Pagamento aleatório", "09256144913", BigDecimal.valueOf(33));
-//
-//            transactionService.register(new SaveTransactionDto(tran1), user2);
-//            transactionService.register(new SaveTransactionDto(tran2), user2);
-//            transactionService.register(new SaveTransactionDto(tran3), user2);
-//
-//            SaveTransactionDto debitGroup = new SaveTransactionDto();
-//            debitGroup.setAmount(BigDecimal.valueOf(-25));
-//            debitGroup.setDescription("Pagamento do grupo Suno bolado");
-//            debitGroup.setPaymentDate(Date.from(Instant.now()));
-//            debitGroup.setCustomerCpfCnpj("09256144913");
-//
-//            transactionService.register(debitGroup, user2);
-//
-//            SaveTransactionDto debitGroup2 = new SaveTransactionDto();
-//            debitGroup2.setAmount(BigDecimal.valueOf(-133));
-//            debitGroup2.setDescription("Pagamento do grupo Suno bolado");
-//            debitGroup2.setPaymentDate(Date.from(Instant.now()));
-//            debitGroup2.setCustomerCpfCnpj("09256144913");
-//
-//            transactionService.register(debitGroup2, user2);
+//            transactionService.register(c1, new SaveTransactionDto(tran1));
+//            transactionService.register(c1, new SaveTransactionDto(tran2));
+//            transactionService.register(c1, new SaveTransactionDto(tran3));
 //
 //        } catch (BusinessException e ){
 //            System.out.println(e.getMessage());

@@ -1,5 +1,6 @@
 package com.jm.jamesapp.models.transaction;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jm.jamesapp.models.BaseModel;
 import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.transaction.enums.TransactionOrigin;
@@ -10,6 +11,8 @@ import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -20,8 +23,8 @@ public class TransactionModel extends BaseModel implements Serializable {
 
     @Enumerated(EnumType.STRING)
     private TransactionType type;
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date paymentDate;
+
+    private Instant paymentDate;
     @ManyToOne
     private UserModel user;
     @ManyToOne
@@ -29,6 +32,19 @@ public class TransactionModel extends BaseModel implements Serializable {
     private BigDecimal amount;;
     private String description;
     private TransactionOrigin origin;
+
+    public TransactionModel() {
+    }
+
+    public TransactionModel(TransactionType type, Instant paymentDate, UserModel user, CustomerModel customer, BigDecimal amount, String description, TransactionOrigin origin) {
+        this.type = type;
+        this.paymentDate = paymentDate;
+        this.user = user;
+        this.customer = customer;
+        this.amount = amount;
+        this.description = description;
+        this.origin = origin;
+    }
 
     public UserModel getUser() {
         return user;
@@ -38,11 +54,11 @@ public class TransactionModel extends BaseModel implements Serializable {
         this.user = user;
     }
 
-    public Date getPaymentDate() {
+    public Instant getPaymentDate() {
         return paymentDate;
     }
 
-    public void setPaymentDate(Date paymentDate) {
+    public void setPaymentDate(Instant paymentDate) {
         this.paymentDate = paymentDate;
     }
 

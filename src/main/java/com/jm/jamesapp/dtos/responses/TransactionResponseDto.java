@@ -5,14 +5,14 @@ import com.jm.jamesapp.models.transaction.enums.TransactionOrigin;
 import com.jm.jamesapp.models.transaction.enums.TransactionType;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.Instant;
 import java.util.UUID;
 
 
 public record TransactionResponseDto(
         UUID id,
         TransactionOrigin origin,
-        Date dueDate,
+        Instant paymentDate,
         TransactionType type,
         UUID ownerId,
         UUID customerId,

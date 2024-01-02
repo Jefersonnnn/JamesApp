@@ -1,6 +1,7 @@
 package com.jm.jamesapp.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jm.jamesapp.models.billgroup.BillGroupClosureModel;
 import com.jm.jamesapp.models.billgroup.BillGroupModel;
 import com.jm.jamesapp.models.transaction.TransactionModel;
 import com.jm.jamesapp.models.user.UserModel;
@@ -12,7 +13,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-//TODO: Interceptar criação da tabela para adicionar prefixo tb_ automaticamente
 @Table(name = "TB_CUSTOMERS", uniqueConstraints = {@UniqueConstraint(columnNames = {"cpfCnpj", "user_id"})})
 public class CustomerModel extends BaseModel implements Serializable {
     @Serial
@@ -34,12 +34,20 @@ public class CustomerModel extends BaseModel implements Serializable {
     @ManyToMany(mappedBy = "customers")
     private Set<BillGroupModel> billGroups = new HashSet<>();
 
+    @ManyToMany(mappedBy = "customers")
+    private Set<BillGroupClosureModel> billGroupClosures;
+
+
     public CustomerModel() {}
 
     public CustomerModel(UserModel user, String name, String cpfCnpj) {
         this.user = user;
         this.name = name;
         this.cpfCnpj = cpfCnpj;
+    }
+
+    public Set<BillGroupClosureModel> getBillGroupClosures() {
+        return billGroupClosures;
     }
 
     public Set<BillGroupModel> getBillGroups() {

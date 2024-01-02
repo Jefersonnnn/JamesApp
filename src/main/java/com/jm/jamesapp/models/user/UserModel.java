@@ -43,6 +43,14 @@ public class UserModel extends BaseModel implements Serializable, UserDetails {
 
     public UserModel() { }
 
+    public UserModel(String name, String username, String email, String password, UserRole role) {
+        this.name = name;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
     public List<CustomerModel> getCustomers() {
         return customers;
     }

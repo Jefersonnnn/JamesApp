@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "TB_GROUP_BILLS", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "user_id"})})
+@Table(name = "TB_BILL_GROUP", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "user_id"})})
 public class BillGroupModel extends BaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -35,11 +35,14 @@ public class BillGroupModel extends BaseModel implements Serializable {
 
     @ManyToMany
     @JoinTable(
-            name = "tb_groupbill_customers",
-            joinColumns = @JoinColumn(name = "groupbill_id", referencedColumnName = "id"),
+            name = "tb_bill_group_customers",
+            joinColumns = @JoinColumn(name = "bill_group_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id")
     )
     private Set<CustomerModel> customers = new HashSet<>();
+
+    @OneToMany(mappedBy = "billGroup")
+    private Set<BillGroupClosureModel> billGroupClosures;
 
 
     public Set<CustomerModel> getCustomers() {

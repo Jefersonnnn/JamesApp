@@ -14,4 +14,6 @@ import java.util.UUID;
 public interface BillGroupRepository extends JpaRepository<BillGroupModel, UUID> {
     Page<BillGroupModel> findAllByUser(Pageable pageable, UserModel userModel);
     Optional<BillGroupModel> findByIdAndUser(UUID id, UserModel userModel);
+    Optional<BillGroupModel> findTopByOrderById();
+    Optional<BillGroupModel> findTop1ByUser(UserModel user);
 }

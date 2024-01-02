@@ -18,7 +18,7 @@ public class AuditorAwareImpl implements AuditorAware<String> {
     @Override
     public Optional<String> getCurrentAuditor() {
         var auth = authenticationFacade.getAuthentication();
-        if (auth == null) return Optional.empty();
+        if (auth == null) return Optional.of("Internal");
         return Optional.ofNullable(auth.getName());
     }
 }

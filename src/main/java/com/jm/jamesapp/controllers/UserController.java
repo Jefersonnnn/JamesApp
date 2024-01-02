@@ -118,6 +118,8 @@ public class UserController {
 
         userService.delete(userToDelete);
         return ResponseEntity.noContent().build();
+
+
     }
 
 }

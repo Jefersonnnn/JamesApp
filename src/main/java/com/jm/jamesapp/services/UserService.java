@@ -8,6 +8,7 @@ import com.jm.jamesapp.repositories.UserRepository;
 import com.jm.jamesapp.services.exceptions.BusinessException;
 import com.jm.jamesapp.services.interfaces.IUserService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,7 +27,7 @@ public class UserService implements IUserService {
 
     @Override
     public UserModel save(SaveUserDto saveUserDto, UserModel userModel) {
-        validateSave(saveUserDto, userModel);
+        validateSave(saveUserDto);
 
         UserModel user = new UserModel();
         user.setName(saveUserDto.getName());
@@ -59,6 +60,10 @@ public class UserService implements IUserService {
         return userRepository.findAll(pageable);
     }
 
+//    public findAll(int pageNo, int pageSize){
+//        Pageable pageable = PageRequest.of(pageNo, pageSize);
+//    }
+
     @Override
     @Nullable
     public UserModel findById(UUID id) {
@@ -83,13 +88,14 @@ public class UserService implements IUserService {
         return userRepository.findByEmail(email).orElse(null);
     }
 
-    private void validateSave(SaveUserDto saveUserDto, UserModel userModel) {
+    private void validateSave(SaveUserDto saveUserDto) {
         if (findByUsername(saveUserDto.getUsername()) != null) throw new BusinessException("Username already exists");
         if (findByEmail(saveUserDto.getEmail()) != null) throw new BusinessException("E-mail already exists");
     }
 
     private String formatUsername(String username) {
         username = username.replace(" ", "_");
+        username = username.replace("-", "_");
         username = username.toLowerCase();
 
         return username;

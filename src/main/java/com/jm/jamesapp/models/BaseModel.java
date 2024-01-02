@@ -7,7 +7,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.UUID;
 
 @MappedSuperclass
@@ -19,17 +19,15 @@ public abstract class BaseModel {
     private UUID id;
 
     @CreatedBy
-    @Column(name = "created_by", nullable = true, updatable = false)
+    @Column(name = "created_by", updatable = false)
     private String createdBy;
     @CreatedDate
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Date createdAt;
+    private Instant createdAt;
 
     @LastModifiedDate
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
-    private Date updatedAt;
+    private Instant updatedAt;
 
     @LastModifiedBy
     @Column(name = "updated_by")
@@ -39,13 +37,13 @@ public abstract class BaseModel {
 
     public BaseModel() {
         if (this.createdAt == null) {
-            this.createdAt = new Date(System.currentTimeMillis());
+            this.createdAt = Instant.now();
         }
     }
 
     @PreUpdate
     public void preUpdate() {
-        this.updatedAt = new Date(System.currentTimeMillis());
+        this.updatedAt = Instant.now();
     }
 
     public UUID getId() {
@@ -64,11 +62,11 @@ public abstract class BaseModel {
         this.createdBy = createdBy;
     }
 
-    public Date getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public Instant getUpdatedAt() {
         return updatedAt;
     }
 
