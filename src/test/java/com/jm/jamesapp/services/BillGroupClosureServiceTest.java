@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -76,7 +77,7 @@ class BillGroupClosureServiceTest {
 
     @Test
     void closeAndSave() {
-        billGroupClosure = new BillGroupClosureModel(billGroup, Instant.parse("2021-12-03T01:50:45Z"), BigDecimal.valueOf(520), Set.of(customer2, customer4));
+        billGroupClosure = new BillGroupClosureModel(billGroup, LocalDate.of(2024, 1, 1), BigDecimal.valueOf(520), Set.of(customer2, customer4));
 
         when(customerService.calculateBalance(customer1)).thenReturn(BigDecimal.valueOf(25));
         when(customerService.calculateBalance(customer2)).thenReturn(BigDecimal.valueOf(260));

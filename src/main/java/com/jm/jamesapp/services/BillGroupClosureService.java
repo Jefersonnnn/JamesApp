@@ -11,10 +11,12 @@ import com.jm.jamesapp.services.exceptions.BusinessException;
 import com.jm.jamesapp.services.interfaces.ICustomerService;
 import com.jm.jamesapp.services.interfaces.IGroupBillClosureService;
 import com.jm.jamesapp.services.interfaces.ITransactionService;
+import com.jm.jamesapp.utils.BigDecimalUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,6 +40,9 @@ public class BillGroupClosureService implements IGroupBillClosureService {
     @Override
     @Transactional
     public BillGroupClosureModel closeAndSave(BillGroupModel billGroup) {
+        if (!billGroup.shouldCloseGroup()){
+            throw new BusinessException("Aguarde o fechamento do grupo");
+        }
         Set<CustomerModel> customers = getAvailableCustomers(billGroup.getCustomers(), billGroup.getValue());
 
         if(customers.isEmpty()){
@@ -76,7 +81,7 @@ public class BillGroupClosureService implements IGroupBillClosureService {
     }
 
     private Set<CustomerModel> getAvailableCustomers(Set<CustomerModel> customers, BigDecimal totalToPay){
-        BigDecimal valuePerShare = totalToPay.divide(BigDecimal.valueOf(customers.size()));
+        BigDecimal valuePerShare = BigDecimalUtils.divideValueMonetary(totalToPay, BigDecimal.valueOf(customers.size()));
 
         Set<CustomerModel> customersWithBalanceAvailable = new HashSet<>();
         for(CustomerModel customer : customers){

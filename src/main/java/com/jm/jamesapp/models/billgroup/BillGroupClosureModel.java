@@ -21,7 +21,7 @@ public class BillGroupClosureModel extends BaseModel implements Serializable {
     @ManyToOne
     @JoinColumn(name = "bill_group_id")
     private BillGroupModel billGroup;
-    private Instant closureDate;
+    private LocalDate closureDate;
     private BigDecimal value;
     @ManyToMany
     @JoinTable(
@@ -31,7 +31,7 @@ public class BillGroupClosureModel extends BaseModel implements Serializable {
     )
     private Set<CustomerModel> customers = new HashSet<>();
 
-    public BillGroupClosureModel(BillGroupModel billGroup, Instant closureDate, BigDecimal value, Set<CustomerModel> customers) {
+    public BillGroupClosureModel(BillGroupModel billGroup, LocalDate closureDate, BigDecimal value, Set<CustomerModel> customers) {
         this.billGroup = billGroup;
         this.closureDate = closureDate;
         this.value = value;
@@ -50,11 +50,11 @@ public class BillGroupClosureModel extends BaseModel implements Serializable {
         this.billGroup = billGroup;
     }
 
-    public Instant getCreated() {
+    public LocalDate getCreated() {
         return closureDate;
     }
 
-    public void setCreated(Instant created) {
+    public void setCreated(LocalDate created) {
         this.closureDate = created;
     }
 

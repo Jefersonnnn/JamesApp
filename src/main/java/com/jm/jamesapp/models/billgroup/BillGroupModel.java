@@ -5,10 +5,12 @@ import com.jm.jamesapp.models.CustomerModel;
 import com.jm.jamesapp.models.billgroup.enums.BillingFrequency;
 import com.jm.jamesapp.models.user.UserModel;
 import jakarta.persistence.*;
+import org.springframework.cglib.core.Local;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,6 +35,9 @@ public class BillGroupModel extends BaseModel implements Serializable {
 
     private String description;
 
+    @Column(nullable = false)
+    private Integer maxClosureDay;
+
     @ManyToMany
     @JoinTable(
             name = "tb_bill_group_customers",
@@ -44,6 +49,10 @@ public class BillGroupModel extends BaseModel implements Serializable {
     @OneToMany(mappedBy = "billGroup")
     private Set<BillGroupClosureModel> billGroupClosures;
 
+    public boolean shouldCloseGroup(){
+        LocalDate currentDate = LocalDate.now();
+        return currentDate.getDayOfMonth() >= maxClosureDay;
+    }
 
     public Set<CustomerModel> getCustomers() {
         return customers;
@@ -87,5 +96,13 @@ public class BillGroupModel extends BaseModel implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public LocalDate getMaxClosureDate() {
+        return maxClosureDate;
+    }
+
+    public void setMaxClosureDate(LocalDate maxClosureDate) {
+        this.maxClosureDate = maxClosureDate;
     }
 }
