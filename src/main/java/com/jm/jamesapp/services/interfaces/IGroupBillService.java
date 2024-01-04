@@ -38,4 +38,7 @@ public interface IGroupBillService{
 
     @Transactional
     void addCustomer(BillGroupModel groupBill, CustomerModel customer);
+
+    @Transactional
+    void closeAndSave(BillGroupModel billGroup);
 }

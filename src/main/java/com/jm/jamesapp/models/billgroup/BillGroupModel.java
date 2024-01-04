@@ -98,11 +98,11 @@ public class BillGroupModel extends BaseModel implements Serializable {
         this.description = description;
     }
 
-    public LocalDate getMaxClosureDate() {
-        return maxClosureDate;
+    public Integer getMaxClosureDay() {
+        return maxClosureDay;
     }
 
-    public void setMaxClosureDate(LocalDate maxClosureDate) {
-        this.maxClosureDate = maxClosureDate;
+    public void setMaxClosureDay(Integer maxClosureDay) {
+        this.maxClosureDay = maxClosureDay;
     }
 }

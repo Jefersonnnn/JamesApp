@@ -7,13 +7,12 @@ import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "TB_BILL_GROUP_CLOSURE")
+@Table(name = "TB_BILL_GROUP_CLOSURE", uniqueConstraints = {@UniqueConstraint(columnNames = {"bill_group_id", "closure_date"})})
 public class BillGroupClosureModel extends BaseModel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -21,6 +20,8 @@ public class BillGroupClosureModel extends BaseModel implements Serializable {
     @ManyToOne
     @JoinColumn(name = "bill_group_id")
     private BillGroupModel billGroup;
+
+    @Column(name = "closure_date")
     private LocalDate closureDate;
     private BigDecimal value;
     @ManyToMany

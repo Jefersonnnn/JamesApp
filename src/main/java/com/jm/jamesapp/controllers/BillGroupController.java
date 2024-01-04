@@ -123,14 +123,26 @@ public class BillGroupController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable(value = "id") UUID id, Authentication authentication) {
-        UserModel userModel = (UserModel) authentication.getPrincipal();
+    public ResponseEntity<Void> delete(@PathVariable(value = "id") UUID id) {
+        UserModel userModel = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
         if (userModel == null) throw new UnauthorizedException();
 
         BillGroupModel groupBillO = groupBillService.findByIdAndUser(id, userModel);
         if (groupBillO == null) throw new ObjectNotFoundException(id, "bill_group");
 
         groupBillService.delete(groupBillO);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/close")
+    public ResponseEntity<Void> closeAndSave(@PathVariable(value = "id") UUID id){
+        UserModel user = (UserModel) authenticationFacade.getAuthentication().getPrincipal();
+        if(user == null) throw new UnauthorizedException();
+
+        BillGroupModel billGroup = groupBillService.findByIdAndUser(id, user);
+        if (billGroup == null) throw new ObjectNotFoundException(id, "bill_group");
+
+        groupBillService.closeAndSave(billGroup);
         return ResponseEntity.noContent().build();
     }
 

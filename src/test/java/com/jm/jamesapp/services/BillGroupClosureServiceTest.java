@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BillGroupClosureServiceTest {
@@ -43,6 +43,9 @@ class BillGroupClosureServiceTest {
 
     @Mock
     private ICustomerService customerService;
+
+    @Mock
+    private LocalDate mockLocalDate;
 
     @InjectMocks
     private BillGroupClosureService billGroupClosureService;
@@ -72,6 +75,7 @@ class BillGroupClosureServiceTest {
         billGroup.setBillingFrequency(BillingFrequency.MONTHLY);
         billGroup.setDescription("Grupo de apostas esportivas");
         billGroup.setValue(BigDecimal.valueOf(520));
+        billGroup.setMaxClosureDay(1);
 
     }
 
@@ -84,7 +88,6 @@ class BillGroupClosureServiceTest {
         when(customerService.calculateBalance(customer3)).thenReturn(BigDecimal.valueOf(25));
         when(customerService.calculateBalance(customer4)).thenReturn(BigDecimal.valueOf(260));
 
-//        when(transactionService.register(Mockito.any(CustomerModel.class), Mockito.any(SaveTransactionDto.class))).thenReturn(new TransactionModel());
         when(billGroupClosureRepository.save(Mockito.any(BillGroupClosureModel.class))).thenReturn(billGroupClosure);
 
         BillGroupClosureModel billGroupClosure = billGroupClosureService.closeAndSave(billGroup);

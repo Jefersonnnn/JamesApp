@@ -16,8 +16,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -43,6 +43,11 @@ public class BillGroupClosureService implements IGroupBillClosureService {
         if (!billGroup.shouldCloseGroup()){
             throw new BusinessException("Aguarde o fechamento do grupo");
         }
+
+        if(billGroup.getCustomers().isEmpty()){
+            throw new BusinessException("Sem clientes no grupo");
+        }
+
         Set<CustomerModel> customers = getAvailableCustomers(billGroup.getCustomers(), billGroup.getValue());
 
         if(customers.isEmpty()){
@@ -52,10 +57,10 @@ public class BillGroupClosureService implements IGroupBillClosureService {
         var valuePerCustomer = billGroup.getValue().divide(BigDecimal.valueOf(customers.size()));
 
         for (CustomerModel customer : customers){
-            transactionService.register(customer, new SaveTransactionDto(Instant.now(), String.format("Pagamento do grupo %s.", billGroup.getName()), valuePerCustomer, TransactionType.BILL_GROUP_PAID));
+            transactionService.register(customer, new SaveTransactionDto(Instant.now(), String.format("Pagamento do grupo %s.", billGroup.getName()), valuePerCustomer.multiply(BigDecimal.valueOf(-1)), TransactionType.BILL_GROUP_PAID));
         }
 
-        BillGroupClosureModel billGroupClosure = new BillGroupClosureModel(billGroup, Instant.now(), billGroup.getValue(), customers);
+        BillGroupClosureModel billGroupClosure = new BillGroupClosureModel(billGroup, LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1), billGroup.getValue(), customers);
 
         return billGroupClosureRepository.save(billGroupClosure);
     }

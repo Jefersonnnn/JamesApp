@@ -7,6 +7,7 @@ import com.jm.jamesapp.models.dto.SaveBillGroupDto;
 import com.jm.jamesapp.models.dto.UpdateBillGroupDto;
 import com.jm.jamesapp.repositories.BillGroupRepository;
 import com.jm.jamesapp.services.exceptions.BusinessException;
+import com.jm.jamesapp.services.interfaces.IGroupBillClosureService;
 import com.jm.jamesapp.services.interfaces.IGroupBillService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,9 +19,11 @@ import java.util.UUID;
 public class BillGroupService implements IGroupBillService {
 
     private final BillGroupRepository groupBillRepository;
+    private final IGroupBillClosureService groupBillClosureService;
 
-    public BillGroupService(BillGroupRepository groupBillRepository) {
+    public BillGroupService(BillGroupRepository groupBillRepository, IGroupBillClosureService groupBillClosureService) {
         this.groupBillRepository = groupBillRepository;
+        this.groupBillClosureService = groupBillClosureService;
     }
 
     @Override
@@ -82,6 +85,10 @@ public class BillGroupService implements IGroupBillService {
     public void addCustomer(BillGroupModel groupBill, CustomerModel customer) {
         groupBill.getCustomers().add(customer);
         groupBillRepository.save(groupBill);
+    }
+
+    public void closeAndSave(BillGroupModel billGroup){
+        groupBillClosureService.closeAndSave(billGroup);
     }
 
     private void validateUpdate(UpdateBillGroupDto groupBillDto, UserModel userModel) {

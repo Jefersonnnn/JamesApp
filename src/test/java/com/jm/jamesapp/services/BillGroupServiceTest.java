@@ -54,13 +54,13 @@ class BillGroupServiceTest {
         saveBillGroupDto.setName("Test group save");
         saveBillGroupDto.setDescription("Test Group desc save");
         saveBillGroupDto.setTotalPayment(BigDecimal.valueOf(125));
-        saveBillGroupDto.setBillingFrequency(BillingFrequency.ANNUALLY);
+        saveBillGroupDto.setBillingFrequency(BillingFrequency.MONTHLY);
 
         updateBillGroupDto = new UpdateBillGroupDto();
         updateBillGroupDto.setName("Test group save");
         updateBillGroupDto.setDescription("Test Group desc save");
         updateBillGroupDto.setTotalPayment(BigDecimal.valueOf(125));
-        updateBillGroupDto.setBillingFrequency(BillingFrequency.ANNUALLY);
+        updateBillGroupDto.setBillingFrequency(BillingFrequency.MONTHLY);
     }
 
     @Test
